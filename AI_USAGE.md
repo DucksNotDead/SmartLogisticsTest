@@ -72,3 +72,33 @@
 - Отклонено: буква «М»/«УЛ» в favicon и «яйцеобразная» форма; итог — мягкий
   жёлтый треугольник без букв.
 - Риск: gen в git шумит в diff; detail/bet routes ещё не заведены.
+
+### `007-list` — список без фильтров
+
+- Scope по оператору: фильтры UI / sync в URL|localStorage **не делаем** в
+  этой change (уйдут отдельно). Zod search params только `page` / `per_page`
+  с fallback `1` / `20`.
+- Решение: stub detail как flat-route `auctions_.$auctionUuid` (URL
+  `/auctions/$uuid`), а не child `auctions.$auctionUuid` — иначе typed `Link`
+  требовал search params списка.
+- Prefetch только `getAuction` на hover/focus; bets не трогаем.
+- MSW seed расширен до 25 items (≥2 страницы при `per_page=20`); GET detail
+  для всех seed uuid.
+- Отклонено: тянуть минимальные фильтры из ТЗ «заодно» в эту change.
+- Дополнение scope: sticky header/footer/pagination; `per_page` enum
+  5/10/15/20 + select; сетка `lg:grid-cols-2`.
+- Compact title: Zustand в `shared/model` + IntersectionObserver на page h1
+  (root = `main[data-app-scroll]`); в header absolute center.
+- Пагинация: отдельные rounded blur-chips; груз - badges под датами (не
+  `mt-auto`).
+- `per_page`: native select заменён на `shared/ui/select` (shadcn/radix),
+  в структуре как `button`/`input` (`shared/ui/select/`).
+- MSW list delay 2s только вне Vitest (`LIST_DELAY_MS`); shell entrance CSS
+  stagger header → content/footer без framer-motion.
+- Mobile compact title: brand-slot swap («Тестовое задание» ↔ «Аукционы»),
+  не center overlay; `md+` center compact сохранён. Pagination mobile
+  default collapsed summary; expand также при доскролле до конца списка
+  (IntersectionObserver на sentinel), collapse при уходе вверх; tap
+  expand/collapse сохранён.
+- Риск: короткий список всегда «у конца» → пагинация сразу expanded на
+  mobile; фильтры ещё не в URL schema.

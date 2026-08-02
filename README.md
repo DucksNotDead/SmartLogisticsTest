@@ -18,13 +18,14 @@ pnpm install
 ```text
 src/
   app/        # entry, QueryClientProvider, MSW, RouterProvider, file-based routes
-  pages/      # auction-list (пока только заголовок)
+  pages/      # auction-list (Query + pagination + states)
   widgets/    # app-shell (header + content + footer)
   entities/   # auction / bet — public API поверх codegen
   shared/
     api/      # HTTP mutator, errors, OpenAPI codegen, MSW mocks
-    ui/       # UI-kit (button/input)
+    ui/       # UI-kit (button/input/select)
     lib/      # cn и прочие утилиты
+    model/    # точечный UI-state (compact title store)
 ```
 
 ## App shell и роутинг
@@ -44,9 +45,38 @@ File-based TanStack Router:
 
 - plugin `@tanstack/router-plugin` в `vite.config.ts` (до `react()`)
 - route-файлы: `src/app/routes/` (`__root`, `/` → redirect на `/auctions`,
-  `/auctions`)
+  `/auctions`, stub `/auctions/$auctionUuid`)
 - сгенерированное дерево: `src/app/routeTree.gen.ts` (в git; не править руками)
 - `RouterProvider` + `createRouter` в `app/`
+
+## Список аукционов
+
+Страница `/auctions` (`pages/auction-list`):
+
+- данные через TanStack Query (`useListAuctions` → `POST /auctions/list`)
+- пагинация по `meta`; `page` и `per_page` в URL; выбор размера
+  5 / 10 / 15 / 20 через `shared/ui/select` (смена → `page=1`)
+- Zod search: `page` fallback `1`; `per_page` только `5|10|15|20`, иначе `20`
+- sticky chrome: header/footer shell + пагинация списка; скролл у main;
+  при mount плавно: header, затем content + footer
+- при скролле page-title под header: на mobile «Аукционы» плавно на месте
+  «Тестовое задание»; на `md+` compact в центре header
+- пагинация: blur-чипы; на mobile по умолчанию summary (tap раскрывает);
+  на `md+` сразу развёрнута; груз в карточке - badges под датами
+- UI states: skeleton / empty / error (+ «Повторить»); skeleton в той же
+  сетке, что и карточки (`lg:grid-cols-2`)
+- в `pnpm dev` MSW держит `POST /auctions/list` ~2s, чтобы skeleton был
+  заметен (в `pnpm test` задержки нет)
+- hover/focus по карточке префетчит `GET /auctions/{uuid}` в Query cache
+- клик ведёт на stub detail (`/auctions/$auctionUuid`); полный detail UI позже
+- адаптив: 1 колонка mobile, 2 колонки на `lg+`; без horizontal overflow
+- **фильтры не реализованы** (отдельная change); в URL только pagination
+
+Примеры:
+
+- `/auctions` или `/auctions?page=1&per_page=20`
+- `/auctions?page=2&per_page=10`
+- битые params (`page=abc`, `per_page=7`) → безопасный fallback
 
 ## API и codegen
 
@@ -71,7 +101,11 @@ HTTP: base `/api/v1`, mutator в `shared/api` (ошибки 401/404/503 → `Pro
 
 Ручные handlers + in-memory store в `shared/api/mocks` (не Orval-mock): после `setBet` обновляются текущая цена, `status_mobile` и список ставок; list item синхронизируется с detail.
 
-В `pnpm dev` worker стартует из `app/main.tsx`. Для unit-тестов тот же store/handlers через `setupServer` (`vitest.setup.ts`).
+В `pnpm dev` worker стартует из `app/main.tsx`. List-handler намеренно
+отвечает с задержкой ~2s (`LIST_DELAY_MS`), чтобы на `/auctions` был виден
+skeleton. В Vitest (`import.meta.env.MODE === 'test'`) delay = 0.
+
+Для unit-тестов тот же store/handlers через `setupServer` (`vitest.setup.ts`).
 
 ## Тема UI
 
@@ -101,8 +135,8 @@ Escape hatch: `HUSKY=0 git commit ...` или `git commit --no-verify`.
 ## Проверка
 
 1. `pnpm verify` — green (typecheck, lint, FSD, api tests).
-2. `pnpm dev` — `/` редиректит на `/auctions`; видны header, заголовок
-   «Аукционы», footer; MSW отвечает на `/api/v1/...`.
-3. Адаптив: ~375px и desktop без горизонтального scroll; кнопка «Разработчик»
-   и ссылки footer открываются корректно.
-4. После смены OpenAPI: `pnpm api:gen`, затем снова `pnpm verify`.
+2. `pnpm dev` — `/` → `/auctions?page=1&per_page=20`; ~2s skeleton, затем список.
+3. Пагинация / `per_page` меняют URL и контент; при скролле chrome и
+   пагинация на месте; hover → prefetch detail; клик → stub `/auctions/{uuid}`.
+4. Адаптив: ~375px 1 колонка, `lg+` 2 колонки; без горизонтального scroll.
+5. После смены OpenAPI: `pnpm api:gen`, затем снова `pnpm verify`.

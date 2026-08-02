@@ -8,6 +8,7 @@
 | `004-theme-config` | done   |
 | `005-api` | done   |
 | `006-layout` | done   |
+| `007-list` | done   |
 
 Легенда: `draft` → `active` → `done` (или `blocked` / `cancelled`).
 

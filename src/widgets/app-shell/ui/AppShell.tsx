@@ -9,12 +9,21 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
   return (
-    <div className="flex min-h-svh flex-col overflow-x-hidden bg-background text-foreground">
-      <Header />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-6 md:py-8">
-        {children}
+    <div className="flex h-svh flex-col overflow-hidden bg-background text-foreground">
+      <div className="shell-animate-header shrink-0">
+        <Header />
+      </div>
+      <main
+        data-app-scroll
+        className="shell-animate-body min-h-0 flex-1 overflow-x-hidden overflow-y-auto"
+      >
+        <div className="mx-auto w-full max-w-6xl px-4 py-6 md:px-6 md:py-8">
+          {children}
+        </div>
       </main>
-      <Footer />
+      <div className="shell-animate-body shrink-0">
+        <Footer />
+      </div>
     </div>
   )
 }

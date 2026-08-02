@@ -5,7 +5,7 @@ const externalLinkProps = {
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-background">
+    <footer className="sticky bottom-0 z-20 shrink-0 border-t border-border bg-background">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 text-sm text-muted-foreground md:px-6">
         <p>
           Разработано с глубоким уважением для "ООО Умная логистика"

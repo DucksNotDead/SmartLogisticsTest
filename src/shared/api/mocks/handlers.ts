@@ -3,6 +3,7 @@ import { http, HttpResponse } from 'msw'
 import type { AuctionListRequest } from '@/shared/api/generated/schemas/auctionListRequest'
 import type { SetBetRequest } from '@/shared/api/generated/schemas/setBetRequest'
 
+import { delayListResponse } from './delay'
 import {
   applySetBet,
   getAuctionBets,
@@ -39,6 +40,8 @@ export const handlers = [
     const fromIndex = (page - 1) * perPage
     const data = all.slice(fromIndex, fromIndex + perPage)
     const lastPage = Math.max(1, Math.ceil(total / perPage) || 1)
+
+    await delayListResponse()
 
     return HttpResponse.json({
       data,

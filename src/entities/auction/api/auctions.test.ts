@@ -5,16 +5,30 @@ import { ApiError, isProblemDetail } from '@/shared/api'
 
 /** Matches seed in `shared/api/mocks/store`. */
 const SEED_AUCTION_UUID = '550e8400-e29b-41d4-a716-446655440000'
+const SEED_TOTAL = 25
 
 test('listAuctions 200 returns data/meta from seed', async () => {
   const response = await listAuctions({ page: 1, per_page: 20 })
 
-  expect(response.data).toHaveLength(1)
+  expect(response.data).toHaveLength(20)
   expect(response.data?.[0]?.main?.order_uid).toBe(SEED_AUCTION_UUID)
   expect(response.meta).toMatchObject({
     current_page: 1,
     per_page: 20,
-    total: 1,
+    total: SEED_TOTAL,
+    last_page: 2,
+  })
+})
+
+test('listAuctions page 2 returns remaining items', async () => {
+  const response = await listAuctions({ page: 2, per_page: 20 })
+
+  expect(response.data).toHaveLength(SEED_TOTAL - 20)
+  expect(response.meta).toMatchObject({
+    current_page: 2,
+    per_page: 20,
+    total: SEED_TOTAL,
+    last_page: 2,
   })
 })
 
@@ -25,6 +39,15 @@ test('getAuction 200 returns detail', async () => {
   expect(detail.trading.can_set_bet).toBe(true)
   expect(detail.trading.status_mobile).toBe('NotParticipating')
   expect(detail.trading.price?.current).toBe(100_000)
+})
+
+test('getAuction 200 for non-first seed item', async () => {
+  const list = await listAuctions({ page: 1, per_page: 20 })
+  const uuid = list.data?.[5]?.main?.order_uid
+  expect(uuid).toBeTruthy()
+
+  const detail = await getAuction(uuid!)
+  expect(detail.main.order_uid).toBe(uuid)
 })
 
 test('getAuction 404 for unknown uuid', async () => {

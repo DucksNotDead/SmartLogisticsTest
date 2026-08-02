@@ -9,11 +9,23 @@ import type { ProblemDetail } from '@/shared/api/errors'
 import type { ValidationProblem } from '@/shared/api/errors'
 
 export const SEED_AUCTION_UUID = '550e8400-e29b-41d4-a716-446655440000'
+/** Enough for ≥2 pages at default `per_page=20`. */
+export const SEED_AUCTION_COUNT = 25
 
-const SEED_AUCTION_ID = 101
+const SEED_AUCTION_ID_BASE = 101
 const CURRENT_SUBSCRIBER_ID = 42
 const COMPETITOR_SUBSCRIBER_ID = 77
 const VAT_DIVISOR = 1.2
+
+const LOAD_CITIES = ['Москва', 'Казань', 'Самара', 'Екатеринбург', 'Новосибирск']
+const UNLOAD_CITIES = ['Санкт-Петербург', 'Нижний Новгород', 'Уфа', 'Пермь', 'Омск']
+const BODY_TYPES = ['Реф', 'Тент', 'Изотерм']
+const AUC_TYPES = [
+  AuctionType.Down,
+  AuctionType.Up,
+  AuctionType.Request,
+  AuctionType.FixPrice,
+] as const
 
 type AuctionRecord = {
   listItem: AuctionListItem
@@ -35,18 +47,35 @@ function priceNoVat(priceWithVat: number): number {
   return Math.round(priceWithVat / VAT_DIVISOR)
 }
 
-function createSeedRecord(): AuctionRecord {
-  const start = 120_000
-  const current = 100_000
+function uuidForIndex(index: number): string {
+  const suffix = (0x446655440000 + index).toString(16).padStart(12, '0')
+  return `550e8400-e29b-41d4-a716-${suffix}`
+}
+
+function createSeedRecord(index: number): AuctionRecord {
+  const auctionId = SEED_AUCTION_ID_BASE + index
+  const orderUid = uuidForIndex(index)
+  const cargoNum = `СЛ-${1001 + index}`
+  const start = 120_000 + index * 1_000
+  const current = 100_000 + index * 500
   const step = 1_000
   const min = 50_000
-  const max = 120_000
+  const max = start
   const currentNoVat = priceNoVat(current)
+  const loadCity = LOAD_CITIES[index % LOAD_CITIES.length]
+  const unloadCity = UNLOAD_CITIES[index % UNLOAD_CITIES.length]
+  const bodyType = BODY_TYPES[index % BODY_TYPES.length]
+  const aucType = AUC_TYPES[index % AUC_TYPES.length]
+  const day = String((index % 28) + 1).padStart(2, '0')
+  const cargoDate = `2026-08-${day}`
+  const weight = 10 + (index % 12)
+  const volume = 20 + (index % 40)
+  const pricePerKm = 80 + (index % 40)
 
   const competitorBet: BetItem = {
     id: 1,
     created_at: '2026-08-01T10:00:00Z',
-    auction_id: SEED_AUCTION_ID,
+    auction_id: auctionId,
     subscriber_id: COMPETITOR_SUBSCRIBER_ID,
     contact_name: 'Конкурент',
     contact_phone: '+70000000001',
@@ -66,20 +95,42 @@ function createSeedRecord(): AuctionRecord {
 
   const listItem: AuctionListItem = {
     main: {
-      id: SEED_AUCTION_ID,
-      cargo_num: 'СЛ-1001',
-      cargo_date: '2026-08-10',
-      auc_type: AuctionType.Down,
-      order_uid: SEED_AUCTION_UUID,
+      id: auctionId,
+      cargo_num: cargoNum,
+      cargo_date: cargoDate,
+      auc_type: aucType,
+      order_uid: orderUid,
       created_at: '2026-08-01T08:00:00Z',
-      priority_sort: 1,
+      priority_sort: index + 1,
       is_assembly: false,
-      price_per_km: null,
+      price_per_km: pricePerKm,
     },
     organizer: {
       subscriber_id: 1,
       organization_name: 'ООО Грузоотправитель',
       organization_inn: '7707654321',
+    },
+    route: {
+      load: {
+        city: loadCity,
+        address: `ул. Погрузки, ${index + 1}`,
+        date: `${cargoDate}T08:00:00Z`,
+        city_gc_id: 1000 + index,
+      },
+      unload: {
+        city: unloadCity,
+        address: `ул. Выгрузки, ${index + 1}`,
+        date: `${cargoDate}T18:00:00Z`,
+        city_gc_id: 2000 + index,
+      },
+    },
+    cargo: {
+      name: `Груз ${index + 1}`,
+      weight,
+      volume,
+      body_type: bodyType,
+      truck_count: 1,
+      is_cargo: true,
     },
     trading: {
       status: 'Auction',
@@ -111,11 +162,11 @@ function createSeedRecord(): AuctionRecord {
 
   const detail: AuctionShowResponse = {
     main: {
-      id: SEED_AUCTION_ID,
-      cargo_num: 'СЛ-1001',
-      cargo_date: '2026-08-10',
-      order_uid: SEED_AUCTION_UUID,
-      auc_type: AuctionType.Down,
+      id: auctionId,
+      cargo_num: cargoNum,
+      cargo_date: cargoDate,
+      order_uid: orderUid,
+      auc_type: aucType,
       created_at: '2026-08-01T08:00:00Z',
     },
     organizer: {
@@ -129,12 +180,12 @@ function createSeedRecord(): AuctionRecord {
     },
     contacts: [],
     cargo: {
-      price: '500000',
+      price: String(500_000 + index * 10_000),
       currency: 643,
       is_international: false,
-      distance: 450,
+      distance: 450 + index * 10,
       truck_count: 1,
-      body_type: 'Реф',
+      body_type: bodyType,
       containered: false,
     },
     trading: {
@@ -169,7 +220,7 @@ function createSeedRecord(): AuctionRecord {
         max_no_vat: priceNoVat(max),
         step,
         step_no_vat: priceNoVat(step),
-        price_per_km: 0,
+        price_per_km: pricePerKm,
       },
       your: {
         bet: false,
@@ -206,10 +257,14 @@ function createSeedRecord(): AuctionRecord {
 }
 
 function cloneSeed(): StoreState {
-  const record = createSeedRecord()
-  return {
-    auctions: new Map([[SEED_AUCTION_UUID, structuredClone(record)]]),
+  const auctions = new Map<string, AuctionRecord>()
+  for (let index = 0; index < SEED_AUCTION_COUNT; index += 1) {
+    const record = createSeedRecord(index)
+    const uuid = record.listItem.main?.order_uid
+    if (!uuid) continue
+    auctions.set(uuid, structuredClone(record))
   }
+  return { auctions }
 }
 
 let state: StoreState = cloneSeed()
@@ -219,7 +274,11 @@ export function resetStore(): void {
 }
 
 export function listAuctionItems(): AuctionListItem[] {
-  return [...state.auctions.values()].map((record) => record.listItem)
+  return [...state.auctions.values()]
+    .map((record) => record.listItem)
+    .sort(
+      (a, b) => (a.main?.priority_sort ?? 0) - (b.main?.priority_sort ?? 0),
+    )
 }
 
 export function getAuctionDetail(
@@ -275,6 +334,7 @@ export function applySetBet(auctionUuid: string, price: unknown): SetBetResult {
   const min = priceBlock?.min ?? null
   const max = priceBlock?.max ?? null
   const step = priceBlock?.step ?? null
+  const auctionId = record.detail.main.id
 
   if (current !== null && price >= current) {
     return {
@@ -327,7 +387,7 @@ export function applySetBet(auctionUuid: string, price: unknown): SetBetResult {
   const newBet: BetItem = {
     id: record.nextBetId,
     created_at: now,
-    auction_id: SEED_AUCTION_ID,
+    auction_id: auctionId,
     subscriber_id: CURRENT_SUBSCRIBER_ID,
     contact_name: 'Текущий пользователь',
     contact_phone: '+70000000042',
