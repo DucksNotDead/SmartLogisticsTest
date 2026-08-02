@@ -1,0 +1,115 @@
+---
+description: Протокол harness — changes, tasks, verify, skills next/review/close
+alwaysApply: true
+---
+
+# Harness protocol
+
+Локальное соглашение репо. Гайд: `harness/README.md`. Шаблон: `harness/changes/_template/`.
+
+## Ответы агента
+
+Без воды. Коротко и по делу: факты, пути файлов, команды, STOP_REASON.
+Не повторять задание, не писать вступления/заключения «если нужно…».
+Экономить токены оператора.
+
+## Active change
+
+1. Читать `harness/ACTIVE.md` (имя change, напр. `003-auction-list`).
+2. Рабочая папка: `harness/changes/<ACTIVE>/`.
+3. Перед кодом, по порядку: `status.md` → `proposal.md` → `design.md` → `tasks.md` → `verify.md`.
+4. Код только в рамках этой change.
+
+Если `ACTIVE.md` пуст или `status` ≠ `active` — не писать продуктовый код, спросить оператора.
+
+## Роли
+
+- Оператор: scope, trade-off, activate/close.
+- Агент: tasks + verify + стоп-репорты.
+- `done` только по `/close-change` или явному указанию оператора.
+
+## Маркер `*` в tasks.md
+
+Критичный task:
+
+```text
+- [ ] обычный шаг
+- [ ] * опасный/крупный шаг
+```
+
+`*` = выполнить только этот task за вызов, затем стоп.
+Перед `*`, если в этом вызове уже были обычные tasks — стоп с `CRITICAL_TASK_AHEAD` (сам `*` не начинать).
+Если первый незакрытый task уже с `*` — выполнить только его и стоп.
+
+`[x]` только после green-проверки шага.
+
+## `/next-task`
+
+1. Взять первый `- [ ]` в `tasks.md`.
+2. Если он с `*` — сделать только его → verify → `[x]` при green → стоп.
+3. Если без `*`:
+   - делать подряд обычные `[ ]`;
+   - после каждого: `pnpm verify` (или script verify из package.json);
+   - на red: ≤2 узких fix на том же task; иначе стоп `VERIFY_RED`;
+   - следующий task с `*` → стоп `CRITICAL_TASK_AHEAD` (не начинать);
+   - tasks кончились → стоп `DONE`.
+4. Scope/trade-off/ambiguity → стоп, код не писать.
+
+Без вызова `/next-task` и без явного режима от оператора — по умолчанию один task (как для `*`).
+
+## `/review-change`
+
+- Режим reviewer: код и harness-статусы не менять.
+- Сверка realization с proposal/design/tasks, OpenAPI (если релевантно), rules.
+- Ответ: Verdict PASS | PASS_WITH_NOTES | FAIL + findings `[severity|major|minor]`.
+- Вызывать после `DONE` (все tasks `[x]`), до `/close-change`.
+
+## `/close-change`
+
+- Только для ACTIVE change со всеми tasks `[x]`.
+- Прогон `verify.md` (auto + acceptance). Red / неподтверждённые manual → не закрывать.
+- При успехе: `status.md` = `done`, обновить `harness/STATUS.md`, очистить `harness/ACTIVE.md`.
+- Следующую change не активировать. Черновик пунктов для `AI_USAGE.md`.
+- Продуктовый код не писать; коммиты не делать.
+
+## Verify
+
+- После task: механический gate (`pnpm verify`).
+- `verify.md` — DoD всей change перед close, не per-task матрица.
+- Red не пропускать.
+
+## STOP_REASON
+
+В конце стопа одной строкой:
+
+STOP_REASON: VERIFY_RED | SCOPE_ESCAPE | TRADEOFF | AMBIGUITY | MANUAL_CHECK | CRITICAL_TASK_AHEAD | DONE
+
+Затем 3–8 строк: сделано / проблема / что нужно от оператора.
+
+Расшифровка:
+
+- VERIFY_RED — task не `[x]`, следующий не брать; показать ошибку.
+- SCOPE_ESCAPE — варианты A урезать / B stub в scope / C новая change; C не реализовывать сам.
+- TRADEOFF — 2–3 варианта; ждать запись решения в `design.md`.
+- AMBIGUITY — цитата OpenAPI/задания; ждать выбора (приоритеты в `project-context`).
+- MANUAL_CHECK — авто-gate green; нужен ручной сценарий из `verify.md`.
+- CRITICAL_TASK_AHEAD — следующий `[ ]` с `*`; ждать нового `/next-task`.
+- DONE — все tasks `[x]`; дальше `/review-change`, затем `/close-change`.
+
+## Запреты без оператора
+
+- Менять scope / out of scope / acceptance в `proposal.md`
+- Писать в `harness/ACTIVE.md`
+- Ставить `done` вне `/close-change`
+- Стартовать следующую change после DONE
+- Коммитить без просьбы
+
+## Out of scope
+
+В proposal — короткий анти-магнит (соседнее и то, что уйдёт в другие changes), не «всё на свете».
+
+## Другие rules
+
+- Стек/OpenAPI/задание → `project-context.mdc`
+- FSD/`@x` → `fsd-structure.mdc`
+- нейминг `.component.tsx` (только detail / set-bet) → `component-naming.mdc`

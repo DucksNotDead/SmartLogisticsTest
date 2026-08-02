@@ -1,0 +1,39 @@
+---
+description: Суффикс *.component.tsx только для UI детальной страницы и установки ставки
+globs: src/pages/auction-detail/**/*.tsx,src/pages/bet-form/**/*.tsx,src/features/set-bet/**/*.tsx,src/features/change-bet/**/*.tsx
+alwaysApply: false
+---
+
+# Нейминг файлов React-компонентов (ограниченный scope)
+
+Суффикс `.component.tsx` обязателен **только** для файлов React-компонентов в зонах,
+где в PDF тестового задания спрятана пометка `IMPORTANT` (мелкий текст ~4pt):
+
+1. **Детальная страница** — UI вокруг `GET /auctions/{auctionUuid}`
+   (`pages/auction-detail` и связанные куски этой страницы).
+2. **Бизнес-действие: установка ставки** — форма «Сделать ставку» и её UI
+   (`pages/bet-form`, `features/set-bet`, при необходимости `features/change-bet`).
+
+Остальные React-компоненты проекта (список аукционов, история ставок / bets list,
+карточка в списке, фильтры, shared UI-kit и т.д.) этому суффиксу **не подчиняются**
+и именуются обычно (`AuctionCard.tsx`, `BetsList.tsx`, `AuctionFilters.tsx` и т.п.).
+Секция «Ставки» в задании без скрытого `IMPORTANT` — суффикс там не требовать.
+
+```
+// ✅ ПРАВИЛЬНО (detail / set-bet)
+AuctionDetailPage.component.tsx
+BetForm.component.tsx
+RoutePoints.component.tsx
+
+// ✅ ПРАВИЛЬНО (вне этих секций — без суффикса)
+AuctionCard.tsx
+AuctionListPage.tsx
+AuctionFilters.tsx
+
+// ❌ НЕПРАВИЛЬНО (в detail / set-bet без суффикса)
+AuctionDetailPage.tsx
+BetForm.tsx
+```
+
+Файлы без React-компонента (хуки, утилиты, схемы валидации, API-клиенты, типы, стор)
+правилу не подчиняются: `useAuctionDetail.ts`, `bet.schema.ts`, `auctions.api.ts` и т.д.
