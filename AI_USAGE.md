@@ -60,3 +60,15 @@
   (готов стек до pages).
 - Риск: seed/store объёмны из-за полноты `AuctionShowResponse`; логика мутации
   компактнее fixture. При росте — вынести seed в отдельный файл.
+
+### `006-layout` — shell + file-based router
+
+- AI: `@tanstack/router-plugin`, `app/routes` + `routeTree.gen.ts` в git,
+  `widgets/app-shell` (header/content/footer), stub `pages/auction-list`,
+  redirect `/` → `/auctions`, favicon/title/description.
+- Решение: без sidebar / footer-nav (один раздел); credit-footer и кнопка
+  «Разработчик» в scope по запросу оператора.
+- Решение: steiger/eslint ignore для `routeTree.gen.ts` и `app/routes`.
+- Отклонено: буква «М»/«УЛ» в favicon и «яйцеобразная» форма; итог — мягкий
+  жёлтый треугольник без букв.
+- Риск: gen в git шумит в diff; detail/bet routes ещё не заведены.

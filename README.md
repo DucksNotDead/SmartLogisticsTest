@@ -17,7 +17,9 @@ pnpm install
 
 ```text
 src/
-  app/        # entry, QueryClientProvider, MSW start (dev), shell
+  app/        # entry, QueryClientProvider, MSW, RouterProvider, file-based routes
+  pages/      # auction-list (пока только заголовок)
+  widgets/    # app-shell (header + content + footer)
   entities/   # auction / bet — public API поверх codegen
   shared/
     api/      # HTTP mutator, errors, OpenAPI codegen, MSW mocks
@@ -25,7 +27,26 @@ src/
     lib/      # cn и прочие утилиты
 ```
 
-Продуктовые `pages` / `widgets` / `features` появятся в следующих шагах.
+## App shell и роутинг
+
+Shell в `widgets/app-shell`: сверху header, ниже outlet страницы, внизу footer
+с кредитами (не tab-bar). Одна модель на mobile (~375px) и desktop (`md`+):
+меняются отступы/ширина, без sidebar и нижней навигации.
+
+- Header: favicon-mark + бренд слева; справа primary-кнопка «Разработчик» →
+  [dev.holuenko.ru](https://dev.holuenko.ru) в новом окне
+- Footer: «Разработано с глубоким уважением для ООО Умная логистика» +
+  Telegram / визитка / почта
+- Document meta: `index.html` (`lang="ru"`, title/description) и
+  `public/favicon.svg` (вкладка + header)
+
+File-based TanStack Router:
+
+- plugin `@tanstack/router-plugin` в `vite.config.ts` (до `react()`)
+- route-файлы: `src/app/routes/` (`__root`, `/` → redirect на `/auctions`,
+  `/auctions`)
+- сгенерированное дерево: `src/app/routeTree.gen.ts` (в git; не править руками)
+- `RouterProvider` + `createRouter` в `app/`
 
 ## API и codegen
 
@@ -80,5 +101,8 @@ Escape hatch: `HUSKY=0 git commit ...` или `git commit --no-verify`.
 ## Проверка
 
 1. `pnpm verify` — green (typecheck, lint, FSD, api tests).
-2. `pnpm dev` — smoke shell; MSW отвечает на `/api/v1/...` (страниц аукционов пока нет).
-3. После смены OpenAPI: `pnpm api:gen`, затем снова `pnpm verify`.
+2. `pnpm dev` — `/` редиректит на `/auctions`; видны header, заголовок
+   «Аукционы», footer; MSW отвечает на `/api/v1/...`.
+3. Адаптив: ~375px и desktop без горизонтального scroll; кнопка «Разработчик»
+   и ссылки footer открываются корректно.
+4. После смены OpenAPI: `pnpm api:gen`, затем снова `pnpm verify`.

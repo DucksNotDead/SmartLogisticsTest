@@ -7,6 +7,7 @@
 | `003-husky-gate` | done   |
 | `004-theme-config` | done   |
 | `005-api` | done   |
+| `006-layout` | done   |
 
 Легенда: `draft` → `active` → `done` (или `blocked` / `cancelled`).
 

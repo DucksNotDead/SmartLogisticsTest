@@ -5,7 +5,16 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'public', 'src/shared/api/generated/**'] },
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'public',
+      'src/shared/api/generated/**',
+      'src/app/routeTree.gen.ts',
+    ],
+  },
+
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -20,7 +29,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/shared/ui/**/*.{ts,tsx}'],
+    files: ['src/shared/ui/**/*.{ts,tsx}', 'src/app/routes/**/*.{ts,tsx}'],
     rules: {
       'react-refresh/only-export-components': 'off',
     },

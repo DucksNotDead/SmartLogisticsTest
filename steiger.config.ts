@@ -4,11 +4,16 @@ import { defineConfig } from 'steiger'
 export default defineConfig([
   ...fsd.configs.recommended,
   {
-    // Codegen layout is not an FSD segment tree.
-    ignores: ['./src/shared/api/generated/**'],
+    // Codegen / file-based router segments are not an FSD segment tree.
+    ignores: [
+      './src/shared/api/generated/**',
+      './src/app/routeTree.gen.ts',
+      './src/app/routes/**',
+    ],
     rules: {
-      // Entities land before pages (005-api); pages come in a later change.
+      // Thin slices (e.g. header-only shell / title page) are intentional early on.
       'fsd/insignificant-slice': 'off',
     },
+
   },
 ])
