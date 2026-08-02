@@ -31,3 +31,11 @@
 - Отклонено: pre-push вместо pre-commit; урезание gate до одного lint.
 - Риск: на больших деревьях pre-commit станет медленным; escape hatch есть, но им легко злоупотребить.
 - Проверено вручную: green commit проходит; `exit 1` в hook abort'ит commit.
+
+### `004-theme-config` — тема с ul.su
+
+- Источник: публичный сайт [ul.su](https://ul.su/); токены в `src/app/styles.css`.
+- Решение: primary = жёлтый `#F9C21D` (CTA сайта), accent = оранжевый `#FF7610`;
+  `primary-foreground` тёмный на жёлтом для контраста.
+- Решение: шрифт Open Sans с сайта не подключали — оставили Geist из bootstrap.
+- Отклонено: пиксель-перфект лендинга / смена UI-kit; только CSS tokens + smoke.
