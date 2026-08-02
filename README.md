@@ -18,12 +18,12 @@ pnpm install
 ```text
 src/
   app/        # entry, QueryClientProvider, MSW, RouterProvider, file-based routes
-  pages/      # auction-list (Query + pagination + states)
-  widgets/    # app-shell (header + content + footer)
-  entities/   # auction / bet — public API поверх codegen
+  pages/      # auction-list (Query + pagination + filters wiring)
+  widgets/    # app-shell, auction-filters (toolbar / drawer / form)
+  entities/   # auction / bet / city — public API поверх codegen
   shared/
     api/      # HTTP mutator, errors, OpenAPI codegen, MSW mocks
-    ui/       # UI-kit (button/input/select)
+    ui/       # UI-kit (button/input/select/sheet)
     lib/      # cn и прочие утилиты
     model/    # точечный UI-state (compact title store)
 ```
@@ -56,27 +56,48 @@ File-based TanStack Router:
 - данные через TanStack Query (`useListAuctions` → `POST /auctions/list`)
 - пагинация по `meta`; `page` и `per_page` в URL; выбор размера
   5 / 10 / 15 / 20 через `shared/ui/select` (смена → `page=1`)
-- Zod search: `page` fallback `1`; `per_page` только `5|10|15|20`, иначе `20`
+- Zod search: `page` / `per_page` + filter keys; битые значения → безопасный
+  fallback (`page=1`, `per_page=20`, неизвестные фильтры отбрасываются)
 - sticky chrome: header/footer shell + пагинация списка; скролл у main;
   при mount плавно: header, затем content + footer
 - при скролле page-title под header: на mobile «Аукционы» плавно на месте
   «Тестовое задание»; на `md+` compact в центре header
 - пагинация: blur-чипы; на mobile по умолчанию summary (tap раскрывает);
   на `md+` сразу развёрнута; груз в карточке - badges под датами
-- UI states: skeleton / empty / error (+ «Повторить»); skeleton в той же
-  сетке, что и карточки (`lg:grid-cols-2`)
+- UI states: skeleton ×12 / empty / error (+ «Повторить»); skeleton в той
+  же сетке, что и карточки (`lg:grid-cols-2`); на `isPending` скролл main
+  заблокирован
 - в `pnpm dev` MSW держит `POST /auctions/list` ~2s, чтобы skeleton был
   заметен (в `pnpm test` задержки нет)
 - hover/focus по карточке префетчит `GET /auctions/{uuid}` в Query cache
 - клик ведёт на stub detail (`/auctions/$auctionUuid`); полный detail UI позже
 - адаптив: 1 колонка mobile, 2 колонки на `lg+`; без horizontal overflow
-- **фильтры не реализованы** (отдельная change); в URL только pagination
+
+### Фильтры списка
+
+- URL = applied filters; правки формы живут в draft до Save
+- Save → URL + `page=1` + список; Cancel discard; Reset → defaults в URL
+- Desktop (`md+`): «Фильтры» (+ «Сбросить») после «На странице» в
+  пагинации; форма в drawer справа; sticky toolbar у заголовка нет
+- Mobile (`<md`): «Фильтры» (+ «Сбросить») и пагинация в одном
+  горизонтальном ряду; при развороте пагинации фильтры остаются; drawer
+  снизу
+- «Фильтры» / «Сбросить» одного крупного размера; Save/Cancel в форме
+  всегда в один ряд
+- Scroll не у конца списка → pagination снова summary (даже после ручного
+  expand)
+- Пресеты toggle (повторный клик снимает): «Можно ставить», «Мои
+  активные», «Скоро закроются», «Под мой кузов»
+- В форме всегда видны: пресеты, номер заявки, сортировка; остальные
+  секции сворачиваемые
+- Города из мок-словаря `entities/city`; MSW реально фильтрует/сортирует
 
 Примеры:
 
 - `/auctions` или `/auctions?page=1&per_page=20`
 - `/auctions?page=2&per_page=10`
-- битые params (`page=abc`, `per_page=7`) → безопасный fallback
+- `/auctions?is_available=true&load_city=Москва&sort_field=stop_time&sort_dir=asc`
+- битые params (`page=abc`, `per_page=7`, неизвестный `status`) → fallback
 
 ## API и codegen
 
@@ -138,5 +159,10 @@ Escape hatch: `HUSKY=0 git commit ...` или `git commit --no-verify`.
 2. `pnpm dev` — `/` → `/auctions?page=1&per_page=20`; ~2s skeleton, затем список.
 3. Пагинация / `per_page` меняют URL и контент; при скролле chrome и
    пагинация на месте; hover → prefetch detail; клик → stub `/auctions/{uuid}`.
-4. Адаптив: ~375px 1 колонка, `lg+` 2 колонки; без горизонтального scroll.
-5. После смены OpenAPI: `pnpm api:gen`, затем снова `pnpm verify`.
+4. Desktop: Фильтры после «На странице»; drawer справа; Save/Cancel/Reset.
+5. Mobile ~375: Фильтры и пагинация в одном ряду; expand не прячет фильтры;
+   scroll не у конца → summary; draft без Save не меняет список.
+6. Pending: 12 skeleton, скролл заблокирован; пресеты toggle; секции
+   формы сворачиваются (кроме пресетов / номера / сортировки).
+7. Адаптив: ~375px 1 колонка, `lg+` 2 колонки; без горизонтального scroll.
+8. После смены OpenAPI: `pnpm api:gen`, затем снова `pnpm verify`.

@@ -24,18 +24,36 @@ export function useCompactHeaderTitle(title = DEFAULT_TITLE) {
     if (!heading) return
 
     const scrollRoot = heading.closest('[data-app-scroll]')
+    const root = scrollRoot instanceof Element ? scrollRoot : null
+
+    const syncVisible = (isIntersecting: boolean) => {
+      setCompactVisible(!isIntersecting)
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setCompactVisible(!(entry?.isIntersecting ?? true))
+        syncVisible(entry?.isIntersecting ?? true)
       },
       {
-        root: scrollRoot instanceof Element ? scrollRoot : null,
+        root,
         threshold: 0,
         rootMargin: '0px 0px 0px 0px',
       },
     )
 
     observer.observe(heading)
+
+    // Float/sticky layouts can report a stale first IO callback; sync from geometry.
+    const rootRect = root?.getBoundingClientRect()
+    const headingRect = heading.getBoundingClientRect()
+    if (rootRect) {
+      const isIntersecting =
+        headingRect.bottom > rootRect.top && headingRect.top < rootRect.bottom
+      syncVisible(isIntersecting)
+    } else {
+      syncVisible(true)
+    }
+
     return () => {
       observer.disconnect()
       setCompactVisible(false)

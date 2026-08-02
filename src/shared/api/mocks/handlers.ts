@@ -4,6 +4,7 @@ import type { AuctionListRequest } from '@/shared/api/generated/schemas/auctionL
 import type { SetBetRequest } from '@/shared/api/generated/schemas/setBetRequest'
 
 import { delayListResponse } from './delay'
+import { filterListItems, sortListItems } from './list-filter'
 import {
   applySetBet,
   getAuctionBets,
@@ -35,10 +36,13 @@ export const handlers = [
     const perPage =
       body?.per_page && body.per_page > 0 ? Math.min(body.per_page, 100) : 20
 
-    const all = listAuctionItems()
-    const total = all.length
+    const filtered = sortListItems(
+      filterListItems(listAuctionItems(), body),
+      body,
+    )
+    const total = filtered.length
     const fromIndex = (page - 1) * perPage
-    const data = all.slice(fromIndex, fromIndex + perPage)
+    const data = filtered.slice(fromIndex, fromIndex + perPage)
     const lastPage = Math.max(1, Math.ceil(total / perPage) || 1)
 
     await delayListResponse()

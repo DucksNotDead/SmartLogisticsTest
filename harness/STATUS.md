@@ -9,6 +9,7 @@
 | `005-api` | done   |
 | `006-layout` | done   |
 | `007-list` | done   |
+| `008-filters` | done   |
 
 Легенда: `draft` → `active` → `done` (или `blocked` / `cancelled`).
 

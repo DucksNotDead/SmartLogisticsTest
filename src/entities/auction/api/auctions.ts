@@ -9,6 +9,11 @@ export {
   useListAuctions,
 } from '@/shared/api/generated/endpoints/auctions/auctions'
 
+export {
+  AuctionType,
+  TradingStatus,
+} from '@/shared/api/generated/schemas'
+
 export type {
   AuctionListItem,
   AuctionListItemTrading,
@@ -18,5 +23,4 @@ export type {
   AuctionShowResponse,
   AuctionShowTrading,
   AuctionStatus,
-  TradingStatus,
 } from '@/shared/api/generated/schemas'

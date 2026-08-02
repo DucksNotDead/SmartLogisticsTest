@@ -6,7 +6,7 @@ export function AuctionListSkeleton() {
       aria-busy="true"
       aria-label="Загрузка списка аукционов"
     >
-      {Array.from({ length: 6 }, (_, index) => (
+      {Array.from({ length: 12 }, (_, index) => (
         <li
           key={index}
           className="h-36 animate-pulse rounded-lg bg-neutral-200 lg:h-40 dark:bg-neutral-700"

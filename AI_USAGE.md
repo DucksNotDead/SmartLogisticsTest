@@ -102,3 +102,16 @@
   expand/collapse сохранён.
 - Риск: короткий список всегда «у конца» → пагинация сразу expanded на
   mobile; фильтры ещё не в URL schema.
+
+### `008-filters` — фильтры списка
+
+- AI: Zod search + `toListRequest`; `widgets/auction-filters` (draft/Save/
+  Cancel, пресеты, drawer); MSW filter/sort; `entities/city`; sheet UI-kit;
+  skeleton ×12 + scroll lock.
+- Оператор: chrome pivot — drawer right/bottom + кнопки в sticky
+  pagination (не sidebar, не sticky toolbar у h1); mobile filters остаются
+  при expand пагинации.
+- Отклонено: later-поля OpenAPI; live-apply; localStorage; hide filters on
+  expand.
+- Риск: длинная форма в drawer; на узком экране lg-кнопка Фильтры рядом с
+  summary пагинации; пресет «Под мой кузов» только открывает секцию.

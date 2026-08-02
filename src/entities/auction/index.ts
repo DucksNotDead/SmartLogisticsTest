@@ -15,5 +15,6 @@ export {
   type AuctionShowResponse,
   type AuctionShowTrading,
   type AuctionStatus,
-  type TradingStatus,
+  AuctionType,
+  TradingStatus,
 } from './api/auctions'

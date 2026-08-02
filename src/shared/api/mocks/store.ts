@@ -1,6 +1,8 @@
 import type { AuctionListItem } from '@/shared/api/generated/schemas/auctionListItem'
 import type { AuctionShowResponse } from '@/shared/api/generated/schemas/auctionShowResponse'
 import type { BetItem } from '@/shared/api/generated/schemas/betItem'
+import { AuctionListItemTradingStatus } from '@/shared/api/generated/schemas/auctionListItemTradingStatus'
+import { AuctionListItemTradingStatusMobile } from '@/shared/api/generated/schemas/auctionListItemTradingStatusMobile'
 import { AuctionStatus } from '@/shared/api/generated/schemas/auctionStatus'
 import { AuctionType } from '@/shared/api/generated/schemas/auctionType'
 import { BidMeasurementType } from '@/shared/api/generated/schemas/bidMeasurementType'
@@ -25,6 +27,22 @@ const AUC_TYPES = [
   AuctionType.Up,
   AuctionType.Request,
   AuctionType.FixPrice,
+] as const
+const AUCTION_STATUSES = [
+  AuctionStatus.Planning,
+  AuctionStatus.Auction,
+  AuctionStatus.DeterminateWinner,
+  AuctionStatus.WaitDeal,
+  AuctionStatus.InProgress,
+  AuctionStatus.Finished,
+  AuctionStatus.Stopped,
+] as const
+const TRADING_MOBILE_STATUSES = [
+  AuctionListItemTradingStatusMobile.NotParticipating,
+  AuctionListItemTradingStatusMobile.Leading,
+  AuctionListItemTradingStatusMobile.Losing,
+  AuctionListItemTradingStatusMobile.Winner,
+  AuctionListItemTradingStatusMobile.Confirmed,
 ] as const
 
 type AuctionRecord = {
@@ -66,11 +84,47 @@ function createSeedRecord(index: number): AuctionRecord {
   const unloadCity = UNLOAD_CITIES[index % UNLOAD_CITIES.length]
   const bodyType = BODY_TYPES[index % BODY_TYPES.length]
   const aucType = AUC_TYPES[index % AUC_TYPES.length]
+  const auctionStatus =
+    index === 0
+      ? AuctionStatus.Auction
+      : AUCTION_STATUSES[index % AUCTION_STATUSES.length]
+  const statusMobile =
+    index === 0
+      ? AuctionListItemTradingStatusMobile.NotParticipating
+      : TRADING_MOBILE_STATUSES[index % TRADING_MOBILE_STATUSES.length]
+  const isBidder =
+    statusMobile === AuctionListItemTradingStatusMobile.Leading ||
+    statusMobile === AuctionListItemTradingStatusMobile.Losing ||
+    statusMobile === AuctionListItemTradingStatusMobile.Winner ||
+    statusMobile === AuctionListItemTradingStatusMobile.Confirmed
+  const isAvailable =
+    index === 0
+      ? true
+      : auctionStatus === AuctionStatus.Auction ||
+        auctionStatus === AuctionStatus.Planning ||
+        index % 3 !== 0
+  const canSetBet = isAvailable && auctionStatus === AuctionStatus.Auction
   const day = String((index % 28) + 1).padStart(2, '0')
   const cargoDate = `2026-08-${day}`
   const weight = 10 + (index % 12)
   const volume = 20 + (index % 40)
   const pricePerKm = 80 + (index % 40)
+  const stopHour = 8 + (index % 40)
+  const stopDay = String(Math.min(28, 1 + Math.floor(index / 2))).padStart(2, '0')
+  const stopTime = `2026-08-${stopDay}T${String(stopHour % 24).padStart(2, '0')}:00:00Z`
+  const startTime = '2026-08-01T09:00:00Z'
+  const detailStatusMobile =
+    statusMobile === AuctionListItemTradingStatusMobile.NotParticipating
+      ? TradingStatus.NotParticipating
+      : statusMobile === AuctionListItemTradingStatusMobile.Leading
+        ? TradingStatus.Leading
+        : statusMobile === AuctionListItemTradingStatusMobile.Losing
+          ? TradingStatus.Losing
+          : statusMobile === AuctionListItemTradingStatusMobile.Winner
+            ? TradingStatus.Winner
+            : statusMobile === AuctionListItemTradingStatusMobile.Confirmed
+              ? TradingStatus.Confirmed
+              : TradingStatus.Unknown
 
   const competitorBet: BetItem = {
     id: 1,
@@ -133,16 +187,16 @@ function createSeedRecord(index: number): AuctionRecord {
       is_cargo: true,
     },
     trading: {
-      status: 'Auction',
-      status_mobile: 'NotParticipating',
-      start_time: '2026-08-01T09:00:00Z',
-      stop_time: '2026-08-03T18:00:00Z',
+      status: auctionStatus as (typeof AuctionListItemTradingStatus)[keyof typeof AuctionListItemTradingStatus],
+      status_mobile: statusMobile,
+      start_time: startTime,
+      stop_time: stopTime,
       bid_measurement_type: BidMeasurementType.PerRoute,
-      can_set_bet: true,
+      can_set_bet: canSetBet,
       allow_counter_bets: false,
       hide_points_address_and_contacts: false,
-      is_bidder: false,
-      is_available: true,
+      is_bidder: isBidder,
+      is_available: isAvailable,
       is_accredited: true,
       is_favorite: false,
       price: {
@@ -151,8 +205,8 @@ function createSeedRecord(index: number): AuctionRecord {
         current_no_vat: currentNoVat,
       },
       your: {
-        bet: false,
-        last_bet: null,
+        bet: isBidder,
+        last_bet: isBidder ? current : null,
       },
       red_bet_with_vat: false,
       red_bet_no_vat: false,
@@ -189,18 +243,18 @@ function createSeedRecord(index: number): AuctionRecord {
       containered: false,
     },
     trading: {
-      status: AuctionStatus.Auction,
-      status_mobile: TradingStatus.NotParticipating,
-      start_time: '2026-08-01T09:00:00Z',
-      stop_time: '2026-08-03T18:00:00Z',
+      status: auctionStatus,
+      status_mobile: detailStatusMobile,
+      start_time: startTime,
+      stop_time: stopTime,
       bid_measurement_type: BidMeasurementType.PerRoute,
-      can_set_bet: true,
+      can_set_bet: canSetBet,
       allow_counter_bets: false,
       hide_bets_history: false,
       hide_places: false,
       no_view_cargo_price: false,
       hide_points_address_and_contacts: false,
-      is_bidder: false,
+      is_bidder: isBidder,
       is_favorite: false,
       is_last_bet_with_vat: true,
       red_bet_with_vat: false,
@@ -223,10 +277,10 @@ function createSeedRecord(index: number): AuctionRecord {
         price_per_km: pricePerKm,
       },
       your: {
-        bet: false,
-        last_bet: null,
-        last_bet_with_vat: null,
-        win: false,
+        bet: isBidder,
+        last_bet: isBidder ? currentNoVat : null,
+        last_bet_with_vat: isBidder ? current : null,
+        win: statusMobile === AuctionListItemTradingStatusMobile.Winner,
       },
       settings: {},
     },
