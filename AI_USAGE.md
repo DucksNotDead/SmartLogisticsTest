@@ -15,3 +15,11 @@
 
 Правило: `.cursor/rules/component-naming.mdc`.
 Отклонено: трактовка «все компоненты проекта» (типичная ошибка AI при полном чтении текста).
+
+### `002-fsd` — каркас FSD + Steiger
+
+- AI перенёс scaffold в `app/` + `shared/`, подключил Steiger (`recommended`) в `pnpm verify`.
+- Решение: пустые `pages/`/`widgets/`/`features/`/`entities/` не создавать (false-positive Steiger).
+- Решение: public API per-component в `shared/ui/*`, без layer-level `shared/index.ts`.
+- Отклонено: ослабления Steiger на этом этапе (не понадобились).
+- Риск: sanity «сломать импорт → red» не гоняли вручную; опирались на recommended + green verify.
