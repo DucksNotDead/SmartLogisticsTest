@@ -77,7 +77,7 @@ alwaysApply: true
 - Только для ACTIVE change со всеми tasks `[x]`.
 - Прогон `verify.md` (auto + acceptance). Red / неподтверждённые manual → не закрывать.
 - При успехе: `status.md` = `done`, обновить `harness/STATUS.md`, очистить `harness/ACTIVE.md`.
-- Затем **один git commit** работы change (если дерево не чистое). Сообщение по ГОСТу:
+- Затем **один git commit** работы change (если дерево не чистое). Сообщение:
   `<type>(<change-id>): <summary>` — Conventional Commits + id change (см. skill `close-change`).
 - Следующую change не активировать. Черновик пунктов для `AI_USAGE.md`.
 - Продуктовый код не писать.

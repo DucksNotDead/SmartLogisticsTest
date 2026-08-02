@@ -2,7 +2,7 @@
 name: close-change
 description: >-
   Закрыть active harness change: verify, status=done, STATUS/ACTIVE,
-  git commit по ГОСТу, черновик AI_USAGE. Без новой change и без лишнего кода.
+  git commit, черновик AI_USAGE. Без новой change и без лишнего кода.
 disable-model-invocation: true
 ---
 
@@ -38,11 +38,11 @@ Next: /next-task
    - `git status` / `git diff` / `git log` — как в user rule committing-changes
    - stage релевантные файлы change (не секреты: `.env`, credentials и т.п.)
    - если нечего коммитить (чистое дерево) — не делать пустой commit; в ответе `Commit: skipped (clean tree)`
-   - иначе один commit с сообщением **по ГОСТу** (см. ниже)
+   - иначе один commit с сообщением (см. ниже)
    - после commit: `git status` для проверки
 5. Черновик для `AI_USAGE.md` (3–5 пуль): что сделал AI, что отклонили/trade-off, риски. Запиши в `AI_USAGE.md` только если файл есть или оператор просил; иначе выведи блок `AI_USAGE_DRAFT` в ответе.
 
-## Commit message (ГОСТ)
+## Commit message
 
 Conventional Commits + id change:
 

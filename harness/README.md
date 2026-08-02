@@ -9,7 +9,7 @@ Skills (Agent → `/`):
 | `/fill-change` | предзаполнить active change по короткому промпту (proposal/design/tasks/verify) |
 | `/next-task` | исполнить task(и): обычные пачкой до `*`/red; `*` — по одному |
 | `/review-change` | ревью без кода по proposal/OpenAPI/rules |
-| `/close-change` | verify → `done` → commit по ГОСТу → очистить ACTIVE.md + черновик AI_USAGE |
+| `/close-change` | verify → `done` → commit → очистить ACTIVE.md + черновик AI_USAGE |
 
 ## Дерево
 
