@@ -39,3 +39,24 @@
   `primary-foreground` тёмный на жёлтом для контраста.
 - Решение: шрифт Open Sans с сайта не подключали — оставили Geist из bootstrap.
 - Отклонено: пиксель-перфект лендинга / смена UI-kit; только CSS tokens + smoke.
+
+### `005-api` — codegen + ручной MSW
+
+- Решение: `openapi-typescript` (schema types) + Orval react-query client,
+  не hand-written DTO (меньше drift, сигнал под OpenAPI codegen из вакансии).
+- Решение: MSW handlers/store **вручную**, Orval `mock: false`.
+  Причина: в ТЗ моки должны реально менять состояние после mutations
+  (`setBet` → current price, статус пользователя, список ставок). Orval-mock
+  даёт faker/статичные ответы по схеме без доменного store; кастом generated
+  mocks при `api:gen` легко затереть. Codegen = types + client; мутации мока =
+  отдельный слой.
+- Отклонено: Orval `mock: true` как единственный источник MSW.
+- Решение: entities тонко re-export'ят ops; pages не импортируют `generated/`.
+- Решение: `shared/api` public API = http/errors/`startApiMocks`; store helpers
+  не реэкспортировать (тесты мутации читают detail/list через `customFetch`).
+- Решение: api unit (4 ops + mutator 422) в `pnpm test` / `pnpm verify` навсегда;
+  общий MSW `setupServer` в `vitest.setup.ts`, `resetStore` в `beforeEach`.
+- Решение: `QueryClientProvider` + MSW worker start в `app` уже в этой change
+  (готов стек до pages).
+- Риск: seed/store объёмны из-за полноты `AuctionShowResponse`; логика мутации
+  компактнее fixture. При росте — вынести seed в отдельный файл.

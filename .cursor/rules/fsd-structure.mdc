@@ -107,7 +107,7 @@ entities/bet/model/bet.ts    — import type { Auction } from 'entities/auction/
 
 ## 5. Специфика этого проекта
 
-- Типы, сгенерированные/списанные из `Input/openapi.auctions.v0.json`, кладём в
+- Типы, сгенерированные/списанные из `input/openapi.auctions.v0.json`, кладём в
   `entities/auction/api` и `entities/bet/api` (сырые DTO), ViewModel-мапперы — в
   соответствующий `model/`.
 - `shared/api` — общий HTTP/query-клиент и MSW-хендлеры (`shared/api/mocks`), не привязанные

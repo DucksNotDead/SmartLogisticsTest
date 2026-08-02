@@ -18,7 +18,7 @@ disable-model-invocation: true
    - acceptance и out of scope из `proposal.md`
    - `design.md`
    - все ли tasks `[x]` (если нет — укажи открытые)
-   - `Input/openapi.auctions.v0.json` (если change трогает API/DTO/MSW)
+   - `input/openapi.auctions.v0.json` (если change трогает API/DTO/MSW)
    - `.cursor/rules/*` (FSD, component-naming: `.component.tsx` только detail/set-bet, project-context)
 4. Не чини. Только findings.
 

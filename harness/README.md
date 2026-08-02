@@ -53,7 +53,7 @@ harness/
 4. `/next-task` → `/review-change` → `/close-change`
 5. `status: done`, git commit `type(NNN-slug): summary`, `ACTIVE.md` очищен
 
-### Commit на close (ГОСТ)
+### Commit на close
 
 ```text
 <type>(<change-id>): <summary>

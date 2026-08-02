@@ -6,7 +6,8 @@
 | `002-fsd` | done   |
 | `003-husky-gate` | done   |
 | `004-theme-config` | done   |
+| `005-api` | done   |
 
-Легенда: `backlog` → `draft` → `active` → `done` (или `blocked` / `cancelled`).
+Легенда: `draft` → `active` → `done` (или `blocked` / `cancelled`).
 
 Active сейчас: см. `harness/ACTIVE.md`.
