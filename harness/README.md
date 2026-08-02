@@ -6,6 +6,7 @@ Skills (Agent → `/`):
 
 | Skill | Назначение |
 |---|---|
+| `/fill-change` | предзаполнить active change по короткому промпту (proposal/design/tasks/verify) |
 | `/next-task` | исполнить task(и): обычные пачкой до `*`/red; `*` — по одному |
 | `/review-change` | ревью без кода по proposal/OpenAPI/rules |
 | `/close-change` | verify → `done` → commit по ГОСТу → очистить ACTIVE.md + черновик AI_USAGE |
@@ -46,9 +47,9 @@ harness/
 
 ## Жизненный цикл change
 
-1. `./scripts/new-change.sh <slug|NNN-slug>`
-2. Заполнить proposal / design / tasks / verify
-3. Approve → `./scripts/activate-change.sh <NNN>` (или сразу `--activate` при создании)
+1. `./scripts/new-change.sh <slug|NNN-slug>` (или `--activate`)
+2. `/fill-change <короткий промпт>` → proposal / design / tasks / verify
+3. Approve оператора (при draft: `./scripts/activate-change.sh <NNN>`)
 4. `/next-task` → `/review-change` → `/close-change`
 5. `status: done`, git commit `type(NNN-slug): summary`, `ACTIVE.md` очищен
 

@@ -1,5 +1,5 @@
 ---
-description: Протокол harness — changes, tasks, verify, skills next/review/close
+description: Протокол harness — changes, tasks, verify, skills fill/next/review/close
 alwaysApply: true
 ---
 
@@ -27,6 +27,14 @@ alwaysApply: true
 - Оператор: scope, trade-off, activate/close.
 - Агент: tasks + verify + стоп-репорты.
 - `done` только по `/close-change` или явному указанию оператора.
+
+## `/fill-change`
+
+- Предзаполнить ACTIVE change по короткому промпту: `proposal` / `design` / `tasks` / `verify`.
+- Продуктовый код не писать. После fill — approve оператора, затем `/next-task`.
+- Если ACTIVE пуст и в промпте есть slug — можно `./scripts/new-change.sh --activate <slug>`.
+- Уже заполненные docs — не перезаписывать без явного overwrite.
+- Skill: `.cursor/skills/fill-change/`.
 
 ## Маркер `*` в tasks.md
 
