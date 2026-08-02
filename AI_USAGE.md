@@ -23,3 +23,11 @@
 - Решение: public API per-component в `shared/ui/*`, без layer-level `shared/index.ts`.
 - Отклонено: ослабления Steiger на этом этапе (не понадобились).
 - Риск: sanity «сломать импорт → red» не гоняли вручную; опирались на recommended + green verify.
+
+### `003-husky-gate` — pre-commit = полный `pnpm verify`
+
+- AI поставил husky + `prepare`, hook `.husky/pre-commit` → `pnpm verify`, секцию в README.
+- Решение (trade-off): полный verify на каждый commit, не lint-staged / не только staged files.
+- Отклонено: pre-push вместо pre-commit; урезание gate до одного lint.
+- Риск: на больших деревьях pre-commit станет медленным; escape hatch есть, но им легко злоупотребить.
+- Проверено вручную: green commit проходит; `exit 1` в hook abort'ит commit.

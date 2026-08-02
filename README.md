@@ -36,6 +36,12 @@ pnpm verify   # typecheck + lint + fsd + test
 
 `pnpm verify` включает Steiger (`@feature-sliced/steiger-plugin`, recommended): нарушения слоёв, cross-import слайсов и обход public API валят проверку.
 
+## Pre-commit
+
+После `pnpm install` Husky ставит git hook `.husky/pre-commit`: каждый `git commit` гоняет полный `pnpm verify` по всему проекту. Red (exit ≠ 0) блокирует commit.
+
+Обойти локально только как escape hatch: `HUSKY=0 git commit ...` или `git commit --no-verify`.
+
 ## Проверка
 
 После установки достаточно `pnpm verify`. На текущем этапе в приложении только smoke shell с shadcn (button/input) из `shared/ui`, без страниц аукционов и MSW-handlers.
