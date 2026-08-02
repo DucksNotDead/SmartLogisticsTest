@@ -8,7 +8,7 @@ Skills (Agent → `/`):
 |---|---|
 | `/next-task` | исполнить task(и): обычные пачкой до `*`/red; `*` — по одному |
 | `/review-change` | ревью без кода по proposal/OpenAPI/rules |
-| `/close-change` | verify → `done` → очистить ACTIVE.md + черновик AI_USAGE |
+| `/close-change` | verify → `done` → commit по ГОСТу → очистить ACTIVE.md + черновик AI_USAGE |
 
 ## Дерево
 
@@ -50,7 +50,15 @@ harness/
 2. Заполнить proposal / design / tasks / verify
 3. Approve → `./scripts/activate-change.sh <NNN>` (или сразу `--activate` при создании)
 4. `/next-task` → `/review-change` → `/close-change`
-5. `status: done`, `ACTIVE.md` очищен
+5. `status: done`, git commit `type(NNN-slug): summary`, `ACTIVE.md` очищен
+
+### Commit на close (ГОСТ)
+
+```text
+<type>(<change-id>): <summary>
+```
+
+Пример: `feat(001-bootstrap): scaffold Vite React TS app with verify gate`
 
 ## tasks.md и `*`
 

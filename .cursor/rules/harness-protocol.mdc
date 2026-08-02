@@ -69,8 +69,10 @@ alwaysApply: true
 - Только для ACTIVE change со всеми tasks `[x]`.
 - Прогон `verify.md` (auto + acceptance). Red / неподтверждённые manual → не закрывать.
 - При успехе: `status.md` = `done`, обновить `harness/STATUS.md`, очистить `harness/ACTIVE.md`.
+- Затем **один git commit** работы change (если дерево не чистое). Сообщение по ГОСТу:
+  `<type>(<change-id>): <summary>` — Conventional Commits + id change (см. skill `close-change`).
 - Следующую change не активировать. Черновик пунктов для `AI_USAGE.md`.
-- Продуктовый код не писать; коммиты не делать.
+- Продуктовый код не писать.
 
 ## Verify
 
@@ -102,7 +104,7 @@ STOP_REASON: VERIFY_RED | SCOPE_ESCAPE | TRADEOFF | AMBIGUITY | MANUAL_CHECK | C
 - Писать в `harness/ACTIVE.md`
 - Ставить `done` вне `/close-change`
 - Стартовать следующую change после DONE
-- Коммитить без просьбы
+- Коммитить без просьбы (исключение: обязательный commit в `/close-change`)
 
 ## Out of scope
 
