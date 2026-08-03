@@ -17,9 +17,8 @@ const queryClient = new QueryClient({
 })
 
 async function bootstrap() {
-  if (import.meta.env.DEV) {
-    await startApiMocks()
-  }
+  // Нет реального бэкенда: MSW нужен и в production (демо на job-app.*).
+  await startApiMocks()
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
