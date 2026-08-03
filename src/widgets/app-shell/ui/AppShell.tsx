@@ -17,15 +17,13 @@ export function AppShell({ children }: AppShellProps) {
       </div>
       <main
         data-app-scroll
-        className="shell-animate-body min-h-0 flex-1 overflow-x-hidden overflow-y-auto"
+        className="shell-animate-body flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
       >
-        <div className="mx-auto w-full max-w-6xl px-4 py-6 md:px-6 md:py-8">
+        <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-6 md:py-8">
           {children}
         </div>
-      </main>
-      <div className="shell-animate-body shrink-0">
         <Footer />
-      </div>
+      </main>
       <Toaster position="top-center" richColors closeButton />
     </div>
   )

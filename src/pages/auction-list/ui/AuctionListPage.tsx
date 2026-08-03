@@ -9,7 +9,6 @@ import {
 } from '@/widgets/auction-filters'
 
 import { useCompactHeaderTitle } from '../lib/use-compact-header-title'
-import { useExpandPaginationOnListEnd } from '../lib/use-expand-pagination-on-list-end'
 import { useLockScrollWhile } from '../lib/use-lock-scroll-while'
 import {
   createDefaultAuctionListSearch,
@@ -17,7 +16,8 @@ import {
   parseAuctionListSearch,
   type AuctionListSearch,
 } from '../model/search'
-import { toListRequest } from '../model/to-list-request'
+import { toListRequest } from '@/pages/auction-list'
+import { AuctionListBottomNav } from './AuctionListBottomNav'
 import { AuctionListEmpty } from './AuctionListEmpty'
 import { AuctionListError } from './AuctionListError'
 import { AuctionListItem } from './AuctionListItem'
@@ -65,8 +65,6 @@ export function AuctionListPage() {
   const total = meta?.total ?? 0
   const showPagination = listQuery.isSuccess
   const showList = listQuery.isSuccess && items.length > 0
-  const { listEndSentinelRef, expanded, setExpanded } =
-    useExpandPaginationOnListEnd(showList)
 
   const handleResetFilters = () => {
     void navigate({
@@ -127,11 +125,10 @@ export function AuctionListPage() {
       ) : null}
 
       {showList ? (
-        <div
-          ref={listEndSentinelRef}
-          data-list-end
-          className="h-px w-full shrink-0"
-          aria-hidden
+        <AuctionListBottomNav
+          page={page}
+          perPage={per_page}
+          lastPage={lastPage}
         />
       ) : null}
 
@@ -141,8 +138,6 @@ export function AuctionListPage() {
           perPage={per_page}
           lastPage={lastPage}
           total={total}
-          expanded={expanded}
-          onExpandedChange={setExpanded}
           filtersSlot={
             <FiltersToolbar
               hasActiveFilters={filtersActive}
