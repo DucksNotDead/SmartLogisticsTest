@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "fsd": "steiger ./src",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "preview": "vite preview",
     "verify": "pnpm typecheck && pnpm lint && pnpm fsd && pnpm test",
     "api:types": "openapi-typescript input/openapi.auctions.v0.json -o src/shared/api/generated/schema.d.ts",
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@feature-sliced/steiger-plugin": "^0.7.0",
+    "@playwright/test": "^1.62.1",
     "@tanstack/router-plugin": "^1.168.23",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",

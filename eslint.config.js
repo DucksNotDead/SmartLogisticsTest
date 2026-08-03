@@ -10,6 +10,8 @@ export default tseslint.config(
       'dist',
       'node_modules',
       'public',
+      'test-results',
+      'playwright-report',
       'src/shared/api/generated/**',
       'src/app/routeTree.gen.ts',
     ],

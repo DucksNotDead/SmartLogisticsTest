@@ -163,3 +163,15 @@
   dump CLI - переложено в per-component folders.
 - Риск: коллизия highlight при одинаковой цене; floating `%` step на
   нецелых ценах; toast + checked дублируют success-сигнал.
+
+### `012-e2e` — Playwright фильтры + set-bet
+
+- AI: `@playwright/test`, `playwright.config.ts` + webServer, `e2e/`
+  (fixtures/helpers + filters/set-bet/smoke specs), script `pnpm test:e2e`.
+- Решение: **Playwright**, не Cypress (webServer built-in, меньше tooling).
+- Решение: e2e **вне** `pnpm verify` / husky — иначе pre-commit слишком
+  медленный; gate остаётся typecheck+lint+fsd+unit.
+- Решение: chromium only; селекторы role/text, без массовых testid.
+- Решение: кейс 422 в UI — stub `window.fetch` поверх MSW (клиентский Zod
+  зеркалит правила MSW и не даёт отправить заведомо битую цену).
+- Отклонено: e2e внутри матрицы всех filter keys / multi-browser / CI YAML.

@@ -13,6 +13,7 @@
 | `009-detail-page` | done   |
 | `010-bets-tab` | done   |
 | `011-bet-create` | done   |
+| `012-e2e` | done   |
 
 Легенда: `draft` → `active` → `done` (или `blocked` / `cancelled`).
 

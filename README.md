@@ -184,10 +184,36 @@ pnpm build     # production-сборка
 pnpm api:gen   # пересборка types/client из OpenAPI
 pnpm fsd       # Steiger (FSD)
 pnpm test      # Vitest (в т.ч. api unit на 4 ops + mutator)
-pnpm verify    # typecheck + lint + fsd + test
+pnpm test:e2e  # Playwright (фильтры + set-bet; webServer → pnpm dev)
+pnpm verify    # typecheck + lint + fsd + test (без e2e)
 ```
 
 `pnpm verify` включает api unit-тесты: они часть постоянного gate (и husky pre-commit).
+E2E в verify/husky **не** входят — гонять отдельно через `pnpm test:e2e`.
+
+## E2E (Playwright)
+
+Один раз после clone (или обновления Playwright):
+
+```bash
+pnpm exec playwright install chromium
+```
+
+Затем:
+
+```bash
+pnpm test:e2e
+```
+
+Конфиг: `playwright.config.ts` (chromium, baseURL `127.0.0.1:5173`,
+`webServer` поднимает `pnpm dev` с MSW). Specs в `e2e/`:
+
+- `filters.spec.ts` — Save/Cancel/Reset, пресет, города, status/statuses,
+  битый query
+- `set-bet.spec.ts` — success + highlight, no-CTA, realtime, 422, пикер
+
+Если dev уже слушает 5173, Playwright переиспользует его
+(`reuseExistingServer`).
 
 ## Pre-commit
 
@@ -198,6 +224,7 @@ Escape hatch: `HUSKY=0 git commit ...` или `git commit --no-verify`.
 ## Проверка
 
 1. `pnpm verify` — green (typecheck, lint, FSD, api tests).
+1a. `pnpm exec playwright install chromium` (один раз) → `pnpm test:e2e`.
 2. `pnpm dev` — `/` → `/auctions?page=1&per_page=20`; ~1s skeleton, затем список.
 3. Пагинация / `per_page` меняют URL и контент; при скролле chrome и
    пагинация на месте; hover → prefetch detail; клик → detail page.
