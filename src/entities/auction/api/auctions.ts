@@ -11,16 +11,26 @@ export {
 
 export {
   AuctionType,
+  BidMeasurementType,
+  OperationType,
   TradingStatus,
 } from '@/shared/api/generated/schemas'
 
 export type {
+  Assembly,
   AuctionListItem,
   AuctionListItemTrading,
   AuctionListMeta,
   AuctionListRequest,
   AuctionListResponseBase,
+  AuctionShowCargo,
+  AuctionShowMain,
+  AuctionShowOrganizer,
+  AuctionShowPayment,
   AuctionShowResponse,
   AuctionShowTrading,
+  AuctionShowTradingSettings,
   AuctionStatus,
+  Contact,
+  RoutePoint,
 } from '@/shared/api/generated/schemas'

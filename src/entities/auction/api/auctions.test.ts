@@ -39,6 +39,34 @@ test('getAuction 200 returns detail', async () => {
   expect(detail.trading.can_set_bet).toBe(true)
   expect(detail.trading.status_mobile).toBe('NotParticipating')
   expect(detail.trading.price?.current).toBe(100_000)
+  expect(detail.contacts.length).toBeGreaterThanOrEqual(1)
+  expect(detail.routes.length).toBeGreaterThanOrEqual(2)
+})
+
+test('getAuction seed includes visibility flag fixtures', async () => {
+  const list = await listAuctions({ page: 1, per_page: 20 })
+  const items = list.data ?? []
+
+  const byUuid = async (index: number) => {
+    const uuid = items[index]?.main?.order_uid
+    expect(uuid).toBeTruthy()
+    return getAuction(uuid!)
+  }
+
+  const hidePoints = await byUuid(1)
+  expect(hidePoints.trading.hide_points_address_and_contacts).toBe(true)
+  expect(items[1]?.trading?.hide_points_address_and_contacts).toBe(true)
+
+  const noCargoPrice = await byUuid(2)
+  expect(noCargoPrice.trading.no_view_cargo_price).toBe(true)
+
+  const hideBets = await byUuid(3)
+  expect(hideBets.trading.hide_bets_history).toBe(true)
+  expect(hideBets.hide_bets_history).toBe(true)
+
+  const cannotBet = await byUuid(4)
+  expect(cannotBet.trading.can_set_bet).toBe(false)
+  expect(items[4]?.trading?.can_set_bet).toBe(false)
 })
 
 test('getAuction 200 for non-first seed item', async () => {

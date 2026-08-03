@@ -18,12 +18,12 @@ pnpm install
 ```text
 src/
   app/        # entry, QueryClientProvider, MSW, RouterProvider, file-based routes
-  pages/      # auction-list (Query + pagination + filters wiring)
+  pages/      # auction-list, auction-detail
   widgets/    # app-shell, auction-filters (toolbar / drawer / form)
   entities/   # auction / bet / city — public API поверх codegen
   shared/
     api/      # HTTP mutator, errors, OpenAPI codegen, MSW mocks
-    ui/       # UI-kit (button/input/select/sheet)
+    ui/       # UI-kit (button/input/select/sheet/tabs)
     lib/      # cn и прочие утилиты
     model/    # точечный UI-state (compact title store)
 ```
@@ -45,7 +45,7 @@ File-based TanStack Router:
 
 - plugin `@tanstack/router-plugin` в `vite.config.ts` (до `react()`)
 - route-файлы: `src/app/routes/` (`__root`, `/` → redirect на `/auctions`,
-  `/auctions`, stub `/auctions/$auctionUuid`)
+  `/auctions`, `/auctions/$auctionUuid`)
 - сгенерированное дерево: `src/app/routeTree.gen.ts` (в git; не править руками)
 - `RouterProvider` + `createRouter` в `app/`
 
@@ -70,8 +70,27 @@ File-based TanStack Router:
 - в `pnpm dev` MSW держит `POST /auctions/list` ~2s, чтобы skeleton был
   заметен (в `pnpm test` задержки нет)
 - hover/focus по карточке префетчит `GET /auctions/{uuid}` в Query cache
-- клик ведёт на stub detail (`/auctions/$auctionUuid`); полный detail UI позже
+- клик ведёт на detail (`/auctions/$auctionUuid`)
 - адаптив: 1 колонка mobile, 2 колонки на `lg+`; без horizontal overflow
+
+## Детальная страница
+
+Страница `/auctions/$auctionUuid` (`pages/auction-detail`):
+
+- данные через TanStack Query (`useGetAuction` → `GET /auctions/{uuid}`)
+- DTO/VM: `AuctionShow*` / `mapAuctionDetail` (не list DTO)
+- chrome: шеврон назад слева от `h1` → список; табы `shared/ui/tabs`
+  «Инфо» | «Ставки»
+- «Инфо»: иерархия hero (цена / статус / своя ставка) → маршрут →
+  supporting grid (груз/ТС, оплата, организатор, контакты, параметры)
+- «Ставки»: placeholder; при `hide_bets_history` - «История ставок скрыта»;
+  без `listBets` / формы set-bet (следующая change)
+- флаги: `can_set_bet`, `hide_bets_history`,
+  `hide_points_address_and_contacts`, `no_view_cargo_price`
+- UI states: skeleton / error (+ retry) / 404
+- enter/exit: CSS fade/slide на корне page (без framer-motion)
+- все React-компоненты detail: суффикс `*.component.tsx`
+- адаптив: `min-w-0` / `overflow-x-hidden`; supporting 1→2 колонки на `md+`
 
 ### Фильтры списка
 
@@ -158,11 +177,13 @@ Escape hatch: `HUSKY=0 git commit ...` или `git commit --no-verify`.
 1. `pnpm verify` — green (typecheck, lint, FSD, api tests).
 2. `pnpm dev` — `/` → `/auctions?page=1&per_page=20`; ~2s skeleton, затем список.
 3. Пагинация / `per_page` меняют URL и контент; при скролле chrome и
-   пагинация на месте; hover → prefetch detail; клик → stub `/auctions/{uuid}`.
-4. Desktop: Фильтры после «На странице»; drawer справа; Save/Cancel/Reset.
-5. Mobile ~375: Фильтры и пагинация в одном ряду; expand не прячет фильтры;
-   scroll не у конца → summary; draft без Save не меняет список.
-6. Pending: 12 skeleton, скролл заблокирован; пресеты toggle; секции
-   формы сворачиваются (кроме пресетов / номера / сортировки).
-7. Адаптив: ~375px 1 колонка, `lg+` 2 колонки; без горизонтального scroll.
-8. После смены OpenAPI: `pnpm api:gen`, затем снова `pnpm verify`.
+   пагинация на месте; hover → prefetch detail; клик → detail page.
+4. Detail: шеврон назад; табы Инфо/Ставки; hero цены доминирует; CSS
+   enter/exit; 404 на неизвестный uuid.
+5. Seed fixtures (list page 1): index 1 hide points/contacts; 2 no cargo
+   price; 3 hide bets history; 4 can_set_bet=false.
+6. Desktop: Фильтры после «На странице»; drawer справа; Save/Cancel/Reset.
+7. Mobile ~375: Фильтры и пагинация в одном ряду; detail без horizontal
+   scroll; draft без Save не меняет список.
+8. Pending list: 12 skeleton, скролл заблокирован; пресеты toggle.
+9. После смены OpenAPI: `pnpm api:gen`, затем снова `pnpm verify`.

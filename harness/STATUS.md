@@ -10,6 +10,7 @@
 | `006-layout` | done   |
 | `007-list` | done   |
 | `008-filters` | done   |
+| `009-detail-page` | done   |
 
 Легенда: `draft` → `active` → `done` (или `blocked` / `cancelled`).
 

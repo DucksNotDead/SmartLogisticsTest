@@ -6,6 +6,7 @@ import { AuctionListItemTradingStatusMobile } from '@/shared/api/generated/schem
 import { AuctionStatus } from '@/shared/api/generated/schemas/auctionStatus'
 import { AuctionType } from '@/shared/api/generated/schemas/auctionType'
 import { BidMeasurementType } from '@/shared/api/generated/schemas/bidMeasurementType'
+import { OperationType } from '@/shared/api/generated/schemas/operationType'
 import { TradingStatus } from '@/shared/api/generated/schemas/tradingStatus'
 import type { ProblemDetail } from '@/shared/api/errors'
 import type { ValidationProblem } from '@/shared/api/errors'
@@ -18,6 +19,12 @@ const SEED_AUCTION_ID_BASE = 101
 const CURRENT_SUBSCRIBER_ID = 42
 const COMPETITOR_SUBSCRIBER_ID = 77
 const VAT_DIVISOR = 1.2
+
+/** Dedicated fixtures (index 0 stays the happy-path / set-bet seed). */
+const SEED_FLAG_HIDE_POINTS = 1
+const SEED_FLAG_NO_CARGO_PRICE = 2
+const SEED_FLAG_HIDE_BETS = 3
+const SEED_FLAG_CANNOT_SET_BET = 4
 
 const LOAD_CITIES = ['Москва', 'Казань', 'Самара', 'Екатеринбург', 'Новосибирск']
 const UNLOAD_CITIES = ['Санкт-Петербург', 'Нижний Новгород', 'Уфа', 'Пермь', 'Омск']
@@ -103,7 +110,13 @@ function createSeedRecord(index: number): AuctionRecord {
       : auctionStatus === AuctionStatus.Auction ||
         auctionStatus === AuctionStatus.Planning ||
         index % 3 !== 0
-  const canSetBet = isAvailable && auctionStatus === AuctionStatus.Auction
+  const hidePointsAddressAndContacts = index === SEED_FLAG_HIDE_POINTS
+  const noViewCargoPrice = index === SEED_FLAG_NO_CARGO_PRICE
+  const hideBetsHistory = index === SEED_FLAG_HIDE_BETS
+  const canSetBet =
+    index === SEED_FLAG_CANNOT_SET_BET
+      ? false
+      : isAvailable && auctionStatus === AuctionStatus.Auction
   const day = String((index % 28) + 1).padStart(2, '0')
   const cargoDate = `2026-08-${day}`
   const weight = 10 + (index % 12)
@@ -113,6 +126,10 @@ function createSeedRecord(index: number): AuctionRecord {
   const stopDay = String(Math.min(28, 1 + Math.floor(index / 2))).padStart(2, '0')
   const stopTime = `2026-08-${stopDay}T${String(stopHour % 24).padStart(2, '0')}:00:00Z`
   const startTime = '2026-08-01T09:00:00Z'
+  const loadAddress = `ул. Погрузки, ${index + 1}`
+  const unloadAddress = `ул. Выгрузки, ${index + 1}`
+  const loadDateTime = `${cargoDate}T08:00:00Z`
+  const unloadDateTime = `${cargoDate}T18:00:00Z`
   const detailStatusMobile =
     statusMobile === AuctionListItemTradingStatusMobile.NotParticipating
       ? TradingStatus.NotParticipating
@@ -167,14 +184,14 @@ function createSeedRecord(index: number): AuctionRecord {
     route: {
       load: {
         city: loadCity,
-        address: `ул. Погрузки, ${index + 1}`,
-        date: `${cargoDate}T08:00:00Z`,
+        address: loadAddress,
+        date: loadDateTime,
         city_gc_id: 1000 + index,
       },
       unload: {
         city: unloadCity,
-        address: `ул. Выгрузки, ${index + 1}`,
-        date: `${cargoDate}T18:00:00Z`,
+        address: unloadAddress,
+        date: unloadDateTime,
         city_gc_id: 2000 + index,
       },
     },
@@ -194,7 +211,7 @@ function createSeedRecord(index: number): AuctionRecord {
       bid_measurement_type: BidMeasurementType.PerRoute,
       can_set_bet: canSetBet,
       allow_counter_bets: false,
-      hide_points_address_and_contacts: false,
+      hide_points_address_and_contacts: hidePointsAddressAndContacts,
       is_bidder: isBidder,
       is_available: isAvailable,
       is_accredited: true,
@@ -232,7 +249,15 @@ function createSeedRecord(index: number): AuctionRecord {
       organization_kpp: '770701001',
       organization_id: 10,
     },
-    contacts: [],
+    contacts: [
+      {
+        name: 'Менеджер торгов',
+        phone: '+79001234567',
+        work_phone: '+74951234567',
+        email: 'auction@example.com',
+        uid: `contact-${index}`,
+      },
+    ],
     cargo: {
       price: String(500_000 + index * 10_000),
       currency: 643,
@@ -250,10 +275,10 @@ function createSeedRecord(index: number): AuctionRecord {
       bid_measurement_type: BidMeasurementType.PerRoute,
       can_set_bet: canSetBet,
       allow_counter_bets: false,
-      hide_bets_history: false,
+      hide_bets_history: hideBetsHistory,
       hide_places: false,
-      no_view_cargo_price: false,
-      hide_points_address_and_contacts: false,
+      no_view_cargo_price: noViewCargoPrice,
+      hide_points_address_and_contacts: hidePointsAddressAndContacts,
       is_bidder: isBidder,
       is_favorite: false,
       is_last_bet_with_vat: true,
@@ -282,7 +307,11 @@ function createSeedRecord(index: number): AuctionRecord {
         last_bet_with_vat: isBidder ? current : null,
         win: statusMobile === AuctionListItemTradingStatusMobile.Winner,
       },
-      settings: {},
+      settings: {
+        prolong_after_bet: 5,
+        winner_confirm: 30,
+        transmission_time_in: 24,
+      },
     },
     payment: {
       form: 'Безналичный',
@@ -297,9 +326,58 @@ function createSeedRecord(index: number): AuctionRecord {
       num: null,
       date: null,
     },
-    routes: [],
+    routes: [
+      {
+        row_num: 1,
+        op_type: OperationType.Loading,
+        start_date: loadDateTime,
+        end_date: `${cargoDate}T12:00:00Z`,
+        comment: null,
+        contractor: 'ООО Склад Погрузки',
+        contractor_inn: '7701111222',
+        location: {
+          city_name: loadCity,
+          city_full_name: `г. ${loadCity}`,
+          city_gc_id: 1000 + index,
+          loading_address: loadAddress,
+        },
+        cargo: {
+          name: `Груз ${index + 1}`,
+          weight: weight.toFixed(3),
+          volume: volume.toFixed(3),
+        },
+        contact: {
+          name: 'Диспетчер погрузки',
+          phone: '+79007654321',
+        },
+      },
+      {
+        row_num: 2,
+        op_type: OperationType.Unloading,
+        start_date: unloadDateTime,
+        end_date: `${cargoDate}T22:00:00Z`,
+        comment: null,
+        contractor: 'ООО Склад Выгрузки',
+        contractor_inn: '7703333444',
+        location: {
+          city_name: unloadCity,
+          city_full_name: `г. ${unloadCity}`,
+          city_gc_id: 2000 + index,
+          loading_address: unloadAddress,
+        },
+        cargo: {
+          name: `Груз ${index + 1}`,
+          weight: weight.toFixed(3),
+          volume: volume.toFixed(3),
+        },
+        contact: {
+          name: 'Диспетчер выгрузки',
+          phone: '+79007654322',
+        },
+      },
+    ],
     admitted_organizations: [],
-    hide_bets_history: false,
+    hide_bets_history: hideBetsHistory,
   }
 
   return {

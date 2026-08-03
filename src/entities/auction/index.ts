@@ -16,5 +16,17 @@ export {
   type AuctionShowTrading,
   type AuctionStatus,
   AuctionType,
+  BidMeasurementType,
+  OperationType,
   TradingStatus,
 } from './api/auctions'
+
+export {
+  mapAuctionDetail,
+  type AuctionDetailPrices,
+  type AuctionDetailRoutePoint,
+  type AuctionDetailViewModel,
+  type AuctionDetailVisibility,
+  type AuctionDetailYourBet,
+  type NullablePrice,
+} from './model/map-auction-detail'

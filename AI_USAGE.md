@@ -115,3 +115,18 @@
   expand.
 - Риск: длинная форма в drawer; на узком экране lg-кнопка Фильтры рядом с
   summary пагинации; пресет «Под мой кузов» только открывает секцию.
+
+### `009-detail-page` — детальная страница (без bets/set-bet)
+
+- AI: `mapAuctionDetail` в `entities/auction/model`; `shared/ui/tabs`;
+  `pages/auction-detail` с `*.component.tsx`; MSW contacts/routes + flag
+  fixtures (index 1–4); иерархия Инфо (hero → маршрут → grid); CSS
+  enter/leave без framer-motion.
+- Решение: tab state локальный (не `?tab=`); bets tab только placeholder /
+  hide_bets_history; back через delayed navigate для leave-анимации.
+- Решение: флаги нормализуются в VM (`visibility.*`); UI читает VM, не
+  сырые DTO-флаги порознь.
+- Out of scope: `listBets`, форма set-bet, инвалидация после ставки.
+- Риск: leave-анимация только на шевроне (browser Back без CSS leave);
+  шеврон делает `history.back()` при наличии history, иначе fallback
+  `/auctions`; deep-link на таб «Ставки» нет.
