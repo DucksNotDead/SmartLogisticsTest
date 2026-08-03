@@ -23,12 +23,12 @@ export function FiltersToolbar({
       <Button
         type="button"
         size="lg"
-        className="rounded-full px-4 shadow-md"
+        className="rounded-full px-5 shadow-md"
         aria-label="Фильтры"
         onClick={openFilters}
       >
         <FilterIcon className="size-5" />
-        <span className="text-sm font-semibold">Фильтры</span>
+        <span>Фильтры</span>
       </Button>
 
       {hasActiveFilters ? (
@@ -36,11 +36,11 @@ export function FiltersToolbar({
           type="button"
           variant="outline"
           size="lg"
-          className="rounded-full bg-background/90 px-4 shadow-md backdrop-blur-md"
+          className="rounded-full bg-background/90 px-5 shadow-md backdrop-blur-md"
           onClick={onReset}
         >
           <RotateCcwIcon className="size-5" />
-          <span className="text-sm font-semibold">Сбросить</span>
+          <span>Сбросить</span>
         </Button>
       ) : null}
     </div>

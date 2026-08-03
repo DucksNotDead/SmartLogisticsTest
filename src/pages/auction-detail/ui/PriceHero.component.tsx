@@ -6,6 +6,9 @@ import { labelOf, MOBILE_STATUS_LABEL, STATUS_LABEL } from '../lib/labels'
 
 type PriceHeroProps = {
   detail: AuctionDetailViewModel
+  onSetBet?: () => void
+  /** Disable CTA while detail is loading / refetching. */
+  setBetDisabled?: boolean
 }
 
 function PriceWithNoVat({
@@ -31,7 +34,11 @@ function PriceWithNoVat({
   )
 }
 
-export function PriceHero({ detail }: PriceHeroProps) {
+export function PriceHero({
+  detail,
+  onSetBet,
+  setBetDisabled = false,
+}: PriceHeroProps) {
   const { prices, your, canSetBet, status, statusMobile } = detail.trading
 
   return (
@@ -101,9 +108,16 @@ export function PriceHero({ detail }: PriceHeroProps) {
         </div>
 
         {canSetBet ? (
-          <p className="text-sm font-medium text-foreground">
-            Можно сделать ставку
-          </p>
+          <Button
+            type="button"
+            size="lg"
+            className="rounded-xl font-semibold"
+            disabled={setBetDisabled || !onSetBet}
+            onClick={onSetBet}
+            data-set-bet-cta="hero"
+          >
+            Установить ставку
+          </Button>
         ) : (
           <Button type="button" disabled variant="secondary">
             Ставка недоступна

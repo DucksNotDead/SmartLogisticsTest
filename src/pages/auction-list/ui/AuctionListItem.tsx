@@ -163,6 +163,7 @@ export function AuctionListItem({ item }: AuctionListItemProps) {
     <Link
       to="/auctions/$auctionUuid"
       params={{ auctionUuid: uuid }}
+      search={{ tab: 'info' }}
       className={cn(
         'group block min-w-0 rounded-lg border border-border px-4 py-3 transition-colors',
         'hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',

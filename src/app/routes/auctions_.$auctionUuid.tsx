@@ -1,8 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { AuctionDetailPage } from '@/pages/auction-detail'
+import {
+  AuctionDetailPage,
+  parseAuctionDetailSearch,
+} from '@/pages/auction-detail'
 
 export const Route = createFileRoute('/auctions_/$auctionUuid')({
+  validateSearch: (search) => parseAuctionDetailSearch(search),
   component: AuctionDetailRoute,
 })
 

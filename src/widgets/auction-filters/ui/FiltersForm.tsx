@@ -53,8 +53,8 @@ function StaticSection({
   className?: string
 }) {
   return (
-    <section className={cn('flex flex-col gap-2', className)}>
-      <h3 className="text-sm font-medium text-foreground">{title}</h3>
+    <section className={cn('flex flex-col gap-2.5', className)}>
+      <h3 className="text-base font-medium text-foreground">{title}</h3>
       {children}
     </section>
   )
@@ -94,9 +94,9 @@ function FieldSection({
         onOpenChange?.(next)
       }}
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-sm font-medium text-foreground select-none [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3.5 py-3 text-base font-medium text-foreground select-none [&::-webkit-details-marker]:hidden">
         <span>{title}</span>
-        <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
+        <ChevronDownIcon className="size-5 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
       </summary>
       <div className="flex flex-col gap-2 border-t border-border/60 px-3 py-3">
         {children}
@@ -118,12 +118,12 @@ function CheckboxRow({
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-center gap-2 rounded-md px-1 py-0.5 text-sm hover:bg-muted/60"
+      className="flex cursor-pointer items-center gap-3 rounded-md px-1 py-1.5 text-base hover:bg-muted/60"
     >
       <input
         id={id}
         type="checkbox"
-        className="size-4 accent-primary"
+        className="size-5 accent-primary"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
       />
@@ -178,7 +178,6 @@ export function FiltersForm({ draft, onChange, className }: FiltersFormProps) {
               <Button
                 key={preset.id}
                 type="button"
-                size="sm"
                 variant={active ? 'default' : 'secondary'}
                 className="rounded-full"
                 aria-pressed={active}

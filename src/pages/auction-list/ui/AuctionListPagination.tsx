@@ -41,7 +41,7 @@ function PaginationChip({
   return (
     <div
       className={cn(
-        'rounded-full border border-border/60 bg-background/80 px-3 py-1.5 shadow-sm backdrop-blur-md',
+        'rounded-full border border-border/60 bg-background/80 px-4 py-2 shadow-sm backdrop-blur-md',
         className,
       )}
     >
@@ -87,7 +87,7 @@ export function AuctionListPagination({
       aria-label="Пагинация списка аукционов"
     >
       {filtersSlot ? (
-        <div className="flex shrink-0 items-center self-center md:hidden">
+        <div className="flex shrink-0 items-end self-end md:hidden">
           {filtersSlot}
         </div>
       ) : null}
@@ -113,11 +113,11 @@ export function AuctionListPagination({
               tabIndex={expanded ? -1 : 0}
               onClick={() => onExpandedChange(true)}
             >
-              <PaginationChip className="inline-flex w-full items-center justify-between gap-2 text-left">
-                <span className="truncate text-sm text-muted-foreground">
+              <PaginationChip className="inline-flex h-12 w-full items-center justify-between gap-2 px-5 py-0 text-left">
+                <span className="truncate text-base text-muted-foreground">
                   {summaryLabel}
                 </span>
-                <ChevronUpIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-300" />
+                <ChevronUpIcon className="size-5 shrink-0 text-muted-foreground transition-transform duration-300" />
               </PaginationChip>
             </button>
           </div>
@@ -141,79 +141,74 @@ export function AuctionListPagination({
           >
             <div className="flex flex-wrap items-center justify-between gap-2 pt-0 md:pt-0">
               <div className="flex flex-wrap items-center gap-2 px-1">
-                <PaginationChip>
-                  <p className="text-sm text-muted-foreground">
+                <PaginationChip className="flex h-12 items-center py-0">
+                  <p className="text-base text-muted-foreground">
                     Страница {page} из {safeLastPage} · всего {total}
                   </p>
                 </PaginationChip>
-                <PaginationChip className="flex items-center gap-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span className="whitespace-nowrap" id="per-page-label">
+                <Select
+                  value={String(perPage)}
+                  onValueChange={(value) => {
+                    changePerPage(Number(value) as PerPageOption)
+                  }}
+                >
+                  <SelectTrigger
+                    aria-labelledby="per-page-label"
+                    className="h-12 min-w-36 gap-2 rounded-full border-border/60 bg-background/80 px-5 text-base shadow-sm backdrop-blur-md data-[size=default]:h-12 dark:bg-background/80"
+                  >
+                    <span
+                      id="per-page-label"
+                      className="text-muted-foreground"
+                    >
                       На странице
                     </span>
-                    <Select
-                      value={String(perPage)}
-                      onValueChange={(value) => {
-                        changePerPage(Number(value) as PerPageOption)
-                      }}
-                    >
-                      <SelectTrigger
-                        size="sm"
-                        aria-labelledby="per-page-label"
-                        className="min-w-16 rounded-full bg-background/90"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent position="popper" align="center">
-                        {PER_PAGE_OPTIONS.map((option) => (
-                          <SelectItem key={option} value={String(option)}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </PaginationChip>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper" align="center">
+                    {PER_PAGE_OPTIONS.map((option) => (
+                      <SelectItem key={option} value={String(option)}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {desktopFiltersSlot ? (
                   <div className="hidden md:block">{desktopFiltersSlot}</div>
                 ) : null}
               </div>
               <div className="flex flex-wrap items-center gap-2 px-1">
-                <PaginationChip className="p-1">
+                <PaginationChip className="flex h-12 items-center p-0">
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="rounded-full"
+                    className="h-12 rounded-full px-4"
                     disabled={page <= 1}
                     onClick={() => goTo(page - 1)}
                   >
                     Назад
                   </Button>
                 </PaginationChip>
-                <PaginationChip className="p-1">
+                <PaginationChip className="flex h-12 items-center p-0">
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="rounded-full"
+                    className="h-12 rounded-full px-4"
                     disabled={page >= lastPage || lastPage <= 1}
                     onClick={() => goTo(page + 1)}
                   >
                     Вперёд
                   </Button>
                 </PaginationChip>
-                <PaginationChip className="p-1 md:hidden">
+                <PaginationChip className="flex h-12 items-center p-0 md:hidden">
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="rounded-full"
+                    className="h-12 rounded-full px-4"
                     aria-expanded={expanded}
                     aria-controls="auction-list-pagination-controls"
                     onClick={() => onExpandedChange(false)}
                   >
-                    <ChevronDownIcon className="size-4" />
+                    <ChevronDownIcon className="size-5" />
                     <span>Свернуть</span>
                   </Button>
                 </PaginationChip>

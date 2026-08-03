@@ -72,12 +72,18 @@ export function FiltersDrawer({ applied, onSave }: FiltersDrawerProps) {
           <Button
             type="button"
             variant="outline"
-            className="flex-1"
+            size="lg"
+            className="h-12 flex-1 rounded-xl"
             onClick={() => setOpen(false)}
           >
             Отмена
           </Button>
-          <Button type="button" className="flex-1" onClick={handleSave}>
+          <Button
+            type="button"
+            size="lg"
+            className="h-12 flex-1 rounded-xl"
+            onClick={handleSave}
+          >
             Сохранить
           </Button>
         </SheetFooter>

@@ -20,10 +20,11 @@ src/
   app/        # entry, QueryClientProvider, MSW, RouterProvider, file-based routes
   pages/      # auction-list, auction-detail
   widgets/    # app-shell, auction-filters (toolbar / drawer / form)
+  features/   # set-bet (форма ставки в bottomsheet)
   entities/   # auction / bet / city — public API поверх codegen
   shared/
     api/      # HTTP mutator, errors, OpenAPI codegen, MSW mocks
-    ui/       # UI-kit (button/input/select/sheet/tabs)
+    ui/       # UI-kit (button/input/select/sheet/tabs/sonner/command/popover)
     lib/      # cn и прочие утилиты
     model/    # точечный UI-state (compact title store)
 ```
@@ -80,7 +81,7 @@ File-based TanStack Router:
 - данные через TanStack Query (`useGetAuction` → `GET /auctions/{uuid}`)
 - DTO/VM: `AuctionShow*` / `mapAuctionDetail` (не list DTO)
 - chrome: шеврон назад слева от `h1` → список; табы `shared/ui/tabs`
-  «Инфо» | «Ставки»
+  «Инфо» | «Ставки» в URL (`?tab=info|bets`, Zod fallback → `info`)
 - «Инфо»: иерархия hero (цена / статус / своя ставка) → маршрут →
   supporting grid (груз/ТС, оплата, организатор, контакты, параметры)
 - «Ставки»: `useListBets` → `GET /auctions/{uuid}/bets?all=true`
@@ -90,14 +91,29 @@ File-based TanStack Router:
 - карточки иерархичные: цена крупнее; place / win / rejected цветом;
   перевозчик и дата вторичнее; `cancel_reason` при отмене
 - `hide_places` скрывает место в рейтинге на карточке ставки
-- empty / skeleton / error(+retry) на вкладке; формы set-bet нет
-  (следующая change)
+- empty / skeleton / error(+retry) на вкладке
 - флаги: `can_set_bet`, `hide_bets_history`, `hide_places`,
   `hide_points_address_and_contacts`, `no_view_cargo_price`
 - UI states detail: skeleton / error (+ retry) / 404
 - enter/exit: CSS fade/slide на корне page (без framer-motion)
-- все React-компоненты detail: суффикс `*.component.tsx`
+- все React-компоненты detail / set-bet: суффикс `*.component.tsx`
 - адаптив: `min-w-0` / `overflow-x-hidden`; supporting 1→2 колонки на `md+`
+
+### Установка ставки
+
+Feature `features/set-bet` + CTA на detail:
+
+- кнопка «Установить ставку» на карточке (PriceHero) и во вкладке
+  «Ставки», только при `trading.can_set_bet`
+- форма в bottomsheet (`Sheet side=bottom`): RHF + Zod; цена > 0;
+  min / max / step / current учитываются, если есть в detail
+- подсказка «доступно / шаг» + Combobox-пикер предложенных шагов
+- realtime-валидация: текст ошибки без shake; на 422 - shake поля +
+  плавное сообщение + error toast (`ValidationProblem.errors[]`)
+- `POST /auctions/{uuid}/bets` → invalidate list / detail / bets;
+  MSW обновляет current price, `status_mobile`, `your`, список ставок
+- success: зелёный checked → через ~1s закрыть sheet → таб «Ставки» →
+  ~1.5s highlight созданной ставки (match по price; ответ API void)
 
 ### Фильтры списка
 
@@ -185,16 +201,19 @@ Escape hatch: `HUSKY=0 git commit ...` или `git commit --no-verify`.
 2. `pnpm dev` — `/` → `/auctions?page=1&per_page=20`; ~1s skeleton, затем список.
 3. Пагинация / `per_page` меняют URL и контент; при скролле chrome и
    пагинация на месте; hover → prefetch detail; клик → detail page.
-4. Detail: шеврон назад; табы Инфо/Ставки; hero цены доминирует; CSS
-   enter/exit; 404 на неизвестный uuid.
+4. Detail: шеврон назад; табы Инфо/Ставки (`?tab=`); hero цены
+   доминирует; CSS enter/exit; 404 на неизвестный uuid.
 5. Seed fixtures (list page 1): index 1 hide points/contacts; 2 no cargo
    price; 3 hide bets history; 4 can_set_bet=false; 5 empty bets;
    6 winner bet (`is_win`); 7 hide places; index 0 — ≥2 ставки +
    rejected с reason.
 6. Detail → «Ставки»: участники, цены с/без НДС, статусы цветом;
    hide bets / hide places / empty / win / rejected.
-7. Desktop: Фильтры после «На странице»; drawer справа; Save/Cancel/Reset.
-8. Mobile ~375: Фильтры и пагинация в одном ряду; detail/bets без
+7. Set-bet (`can_set_bet=true`): CTA на карточке и во вкладке ставок →
+   bottomsheet; пикер шага; успех → checked → таб «Ставки» + highlight;
+   невалидная цена → 422 shake; `can_set_bet=false` → CTA нет.
+8. Desktop: Фильтры после «На странице»; drawer справа; Save/Cancel/Reset.
+9. Mobile ~375: Фильтры и пагинация в одном ряду; detail/bets/sheet без
    horizontal scroll; draft без Save не меняет список.
-9. Pending list: 12 skeleton, скролл заблокирован; пресеты toggle.
+10. Pending list: 12 skeleton, скролл заблокирован; пресеты toggle.
 10. После смены OpenAPI: `pnpm api:gen`, затем снова `pnpm verify`.

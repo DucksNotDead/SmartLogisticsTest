@@ -11,16 +11,16 @@ type DetailHeaderProps = {
 
 export function DetailHeader({ title, titleRef, onBack }: DetailHeaderProps) {
   return (
-    <header className="flex min-w-0 items-start gap-1">
+    <header className="flex min-w-0 items-center gap-1">
       <Button
         type="button"
         variant="ghost"
-        size="icon"
-        className="mt-0.5 shrink-0"
+        size="icon-lg"
+        className="shrink-0"
         aria-label="Назад к списку аукционов"
         onClick={onBack}
       >
-        <ChevronLeft />
+        <ChevronLeft className="size-7" />
       </Button>
       <h1
         ref={titleRef}

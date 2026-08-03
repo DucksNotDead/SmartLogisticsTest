@@ -144,3 +144,22 @@
   route `/bets`.
 - Риск: без `all=true` rejected ставки не видны (MSW/API фильтр);
   склонение «участник/участника/участников» упрощённое.
+
+### `011-bet-create` — форма ставки
+
+- AI: `features/set-bet` (Zod schema, suggest-prices, mutation wrapper,
+  bottomsheet UI `*.component.tsx`); sonner Toaster; Combobox
+  (Popover+Command); wiring CTA на PriceHero / BetsTab; controlled tabs;
+  post-success highlight.
+- Решение: Zod на string input + `parseBetPriceInput` (удобнее RHF, чем
+  coerce number); step-валидация относительно `current` (как MSW).
+- Решение: highlight по `price` после void 200 (не менять OpenAPI);
+  при `hide_bets_history` tab открывается, highlight пропускается.
+- Решение: realtime без shake; shake только на 422 server errors.
+- Решение: табы detail в URL — `?tab=info|bets` (`parseAuctionDetailSearch`
+  + `validateSearch`); битый/пустой → `info`; смена таба и post-success
+  → `navigate({ search.tab })` (`replace: true`).
+- Отклонено: `next-themes` из shadcn sonner scaffold; flat `shared/ui/*.tsx`
+  dump CLI - переложено в per-component folders.
+- Риск: коллизия highlight при одинаковой цене; floating `%` step на
+  нецелых ценах; toast + checked дублируют success-сигнал.

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+import { Toaster } from '@/shared/ui/sonner'
+
 import { Footer } from './Footer'
 import { Header } from './Header'
 
@@ -24,6 +26,7 @@ export function AppShell({ children }: AppShellProps) {
       <div className="shell-animate-body shrink-0">
         <Footer />
       </div>
+      <Toaster position="top-center" richColors closeButton />
     </div>
   )
 }

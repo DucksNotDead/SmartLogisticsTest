@@ -6,9 +6,10 @@ import { formatDateTime, formatPrice } from '../lib/format'
 type BetCardProps = {
   bet: BetViewModel
   hidePlaces: boolean
+  highlighted?: boolean
 }
 
-export function BetCard({ bet, hidePlaces }: BetCardProps) {
+export function BetCard({ bet, hidePlaces, highlighted = false }: BetCardProps) {
   const showPlace = !hidePlaces && bet.place != null
 
   return (
@@ -17,8 +18,10 @@ export function BetCard({ bet, hidePlaces }: BetCardProps) {
         'min-w-0 overflow-hidden rounded-xl border border-border px-4 py-4',
         bet.isWin && 'border-accent/40 bg-accent/5',
         bet.isRejected && 'border-destructive/30 bg-destructive/5',
+        highlighted && 'bet-highlight',
       )}
       data-bet-id={bet.id ?? undefined}
+      data-bet-highlighted={highlighted || undefined}
       data-is-win={bet.isWin || undefined}
       data-is-rejected={bet.isRejected || undefined}
     >

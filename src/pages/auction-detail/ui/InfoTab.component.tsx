@@ -10,16 +10,26 @@ import { TradingParams } from './TradingParams.component'
 
 type InfoTabProps = {
   detail: AuctionDetailViewModel
+  onSetBet?: () => void
+  setBetDisabled?: boolean
 }
 
-export function InfoTab({ detail }: InfoTabProps) {
+export function InfoTab({
+  detail,
+  onSetBet,
+  setBetDisabled = false,
+}: InfoTabProps) {
   const showAddresses = detail.visibility.pointAddresses
   const showCargoPrice = detail.visibility.cargoPrice
   const showContacts = detail.visibility.contacts
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
-      <PriceHero detail={detail} />
+      <PriceHero
+        detail={detail}
+        onSetBet={onSetBet}
+        setBetDisabled={setBetDisabled}
+      />
 
       <div className="min-w-0 rounded-xl border border-border px-4 py-4 md:px-5">
         <RoutePoints
