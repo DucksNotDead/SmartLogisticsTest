@@ -5,12 +5,33 @@ import { ApiError, customFetch, isValidationProblem } from '@/shared/api'
 
 /** Matches seed in `shared/api/mocks/store`. */
 const SEED_AUCTION_UUID = '550e8400-e29b-41d4-a716-446655440000'
+const SEED_EMPTY_BETS_UUID = '550e8400-e29b-41d4-a716-446655440005'
+const SEED_WINNER_BET_UUID = '550e8400-e29b-41d4-a716-446655440006'
 
 test('listBets 200 returns bets[]', async () => {
   const response = await listBets(SEED_AUCTION_UUID)
 
   expect(response.bets.length).toBeGreaterThanOrEqual(1)
   expect(response.bets[0]?.price_with_vat).toBe(100_000)
+})
+
+test('seed bets: multi places, rejected+reason, empty, win; all filters', async () => {
+  const multi = await listBets(SEED_AUCTION_UUID, { all: true })
+  expect(multi.bets.length).toBeGreaterThanOrEqual(2)
+  expect(multi.bets.filter((bet) => bet.place != null).length).toBeGreaterThanOrEqual(
+    2,
+  )
+  const rejected = multi.bets.find((bet) => bet.is_rejected)
+  expect(rejected?.cancel_reason).toBeTruthy()
+
+  const activeOnly = await listBets(SEED_AUCTION_UUID)
+  expect(activeOnly.bets.every((bet) => !bet.is_rejected)).toBe(true)
+  expect(activeOnly.bets.length).toBeLessThan(multi.bets.length)
+
+  expect((await listBets(SEED_EMPTY_BETS_UUID)).bets).toEqual([])
+
+  const winBets = await listBets(SEED_WINNER_BET_UUID)
+  expect(winBets.bets.some((bet) => bet.is_win)).toBe(true)
 })
 
 test('setBet 200 mutates price, status_mobile, bets and list item', async () => {

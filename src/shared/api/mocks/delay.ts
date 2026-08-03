@@ -1,9 +1,9 @@
 import { delay } from 'msw'
 
-/** Browser: keep list pending ~2s so skeleton is visible. Vitest: no delay. */
-export const LIST_DELAY_MS = 1000
+/** Browser: keep mocks pending so skeleton/loading is visible. Vitest: 0. */
+export const MOCK_DELAY_MS = 1000
 
-export async function delayListResponse(): Promise<void> {
-  if (LIST_DELAY_MS <= 0) return
-  await delay(LIST_DELAY_MS)
+export async function delayMockResponse(): Promise<void> {
+  if (import.meta.env.MODE === 'test' || MOCK_DELAY_MS <= 0) return
+  await delay(MOCK_DELAY_MS)
 }

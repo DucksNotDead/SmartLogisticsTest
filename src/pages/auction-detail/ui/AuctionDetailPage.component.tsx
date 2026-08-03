@@ -9,7 +9,7 @@ import { useDetailChromeTitle } from '../lib/use-detail-chrome-title'
 import { usePageLeaveTransition } from '../lib/use-page-leave-transition'
 import { AuctionDetailError } from './AuctionDetailError.component'
 import { AuctionDetailSkeleton } from './AuctionDetailSkeleton.component'
-import { BetsTabPlaceholder } from './BetsTabPlaceholder.component'
+import { BetsTab } from './BetsTab.component'
 import { DetailHeader } from './DetailHeader.component'
 import { DetailTabs } from './DetailTabs.component'
 import { InfoTab } from './InfoTab.component'
@@ -77,8 +77,10 @@ export function AuctionDetailPage({ auctionUuid }: AuctionDetailPageProps) {
       <DetailTabs
         info={<InfoTab detail={detail} />}
         bets={
-          <BetsTabPlaceholder
+          <BetsTab
+            auctionUuid={auctionUuid}
             hideBetsHistory={!detail.visibility.betsHistory}
+            hidePlaces={!detail.visibility.places}
           />
         }
       />

@@ -93,7 +93,7 @@
   `mt-auto`).
 - `per_page`: native select заменён на `shared/ui/select` (shadcn/radix),
   в структуре как `button`/`input` (`shared/ui/select/`).
-- MSW list delay 2s только вне Vitest (`LIST_DELAY_MS`); shell entrance CSS
+- MSW delay ~1s на все handlers вне Vitest (`MOCK_DELAY_MS`); shell entrance CSS
   stagger header → content/footer без framer-motion.
 - Mobile compact title: brand-slot swap («Тестовое задание» ↔ «Аукционы»),
   не center overlay; `md+` center compact сохранён. Pagination mobile
@@ -130,3 +130,17 @@
 - Риск: leave-анимация только на шевроне (browser Back без CSS leave);
   шеврон делает `history.back()` при наличии history, иначе fallback
   `/auctions`; deep-link на таб «Ставки» нет.
+
+### `010-bets-tab` — вкладка ставок
+
+- AI: `mapBetItem` / `mapBetList` в `entities/bet/model`; `BetsTab` +
+  `BetCard` в `pages/auction-detail` (`*.component.tsx`); MSW seed
+  multi/empty/rejected/win; query `all=true` для отменённых.
+- Решение: participants = unique `organization_id` (нет поля в
+  `BetListResponse`); при `hide_bets_history` query `enabled: false`;
+  `hide_places` скрывает place на карточке.
+- Решение: тесты hide_* через `renderToStaticMarkup` (без RTL deps).
+- Out of scope: форма set-bet, инвалидация после mutation, отдельный
+  route `/bets`.
+- Риск: без `all=true` rejected ставки не видны (MSW/API фильтр);
+  склонение «участник/участника/участников» упрощённое.

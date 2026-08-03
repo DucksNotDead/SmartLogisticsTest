@@ -25,6 +25,12 @@ const SEED_FLAG_HIDE_POINTS = 1
 const SEED_FLAG_NO_CARGO_PRICE = 2
 const SEED_FLAG_HIDE_BETS = 3
 const SEED_FLAG_CANNOT_SET_BET = 4
+/** Empty bets history (UI empty state). */
+const SEED_FLAG_EMPTY_BETS = 5
+/** Finished auction with a winning bet (`is_win`). */
+const SEED_FLAG_WINNER_BET = 6
+/** Detail/bets: hide ranking place (`hide_places`). */
+const SEED_FLAG_HIDE_PLACES = 7
 
 const LOAD_CITIES = ['Москва', 'Казань', 'Самара', 'Екатеринбург', 'Новосибирск']
 const UNLOAD_CITIES = ['Санкт-Петербург', 'Нижний Новгород', 'Уфа', 'Пермь', 'Омск']
@@ -77,6 +83,113 @@ function uuidForIndex(index: number): string {
   return `550e8400-e29b-41d4-a716-${suffix}`
 }
 
+function createBet(partial: BetItem): BetItem {
+  return {
+    transporter_comment: null,
+    is_rejected: false,
+    is_counter: false,
+    is_win: false,
+    run_number: 0,
+    cancel_reason: '',
+    ...partial,
+  }
+}
+
+/**
+ * Seed bets by fixture index.
+ * Index 0: ≥2 ranked bets + rejected with reason (needs `all=true`).
+ * Index 5: empty. Index 6: winner.
+ */
+function createSeedBets(
+  index: number,
+  auctionId: number,
+  current: number,
+  currentNoVat: number,
+): { bets: BetItem[]; nextBetId: number } {
+  if (index === SEED_FLAG_EMPTY_BETS) {
+    return { bets: [], nextBetId: 1 }
+  }
+
+  if (index === SEED_FLAG_WINNER_BET) {
+    return {
+      bets: [
+        createBet({
+          id: 1,
+          created_at: '2026-08-01T12:00:00Z',
+          auction_id: auctionId,
+          subscriber_id: COMPETITOR_SUBSCRIBER_ID,
+          contact_name: 'Победитель',
+          contact_phone: '+70000000001',
+          price_with_vat: current,
+          price_no_vat: currentNoVat,
+          organization_id: 501,
+          organization_inn: '7701234567',
+          organization_name: 'ООО Победитель',
+          place: 1,
+          is_win: true,
+        }),
+      ],
+      nextBetId: 2,
+    }
+  }
+
+  const competitorBet = createBet({
+    id: 1,
+    created_at: '2026-08-01T10:00:00Z',
+    auction_id: auctionId,
+    subscriber_id: COMPETITOR_SUBSCRIBER_ID,
+    contact_name: 'Конкурент',
+    contact_phone: '+70000000001',
+    price_with_vat: current,
+    price_no_vat: currentNoVat,
+    organization_id: 501,
+    organization_inn: '7701234567',
+    organization_name: 'ООО Конкурент',
+    place: 1,
+  })
+
+  if (index !== 0) {
+    return { bets: [competitorBet], nextBetId: 2 }
+  }
+
+  const secondPlace = createBet({
+    id: 2,
+    created_at: '2026-08-01T09:30:00Z',
+    auction_id: auctionId,
+    subscriber_id: 88,
+    contact_name: 'Второй',
+    contact_phone: '+70000000002',
+    price_with_vat: current + 2_000,
+    price_no_vat: priceNoVat(current + 2_000),
+    organization_id: 502,
+    organization_inn: '7701234568',
+    organization_name: 'ООО Второй Перевозчик',
+    place: 2,
+  })
+
+  const rejectedBet = createBet({
+    id: 3,
+    created_at: '2026-08-01T09:00:00Z',
+    auction_id: auctionId,
+    subscriber_id: 99,
+    contact_name: 'Отменённый',
+    contact_phone: '+70000000003',
+    price_with_vat: current + 5_000,
+    price_no_vat: priceNoVat(current + 5_000),
+    organization_id: 503,
+    organization_inn: '7701234569',
+    organization_name: 'ООО Отменённый',
+    place: null,
+    is_rejected: true,
+    cancel_reason: 'Отзыв перевозчика',
+  })
+
+  return {
+    bets: [competitorBet, secondPlace, rejectedBet],
+    nextBetId: 4,
+  }
+}
+
 function createSeedRecord(index: number): AuctionRecord {
   const auctionId = SEED_AUCTION_ID_BASE + index
   const orderUid = uuidForIndex(index)
@@ -113,6 +226,7 @@ function createSeedRecord(index: number): AuctionRecord {
   const hidePointsAddressAndContacts = index === SEED_FLAG_HIDE_POINTS
   const noViewCargoPrice = index === SEED_FLAG_NO_CARGO_PRICE
   const hideBetsHistory = index === SEED_FLAG_HIDE_BETS
+  const hidePlaces = index === SEED_FLAG_HIDE_PLACES
   const canSetBet =
     index === SEED_FLAG_CANNOT_SET_BET
       ? false
@@ -143,26 +257,12 @@ function createSeedRecord(index: number): AuctionRecord {
               ? TradingStatus.Confirmed
               : TradingStatus.Unknown
 
-  const competitorBet: BetItem = {
-    id: 1,
-    created_at: '2026-08-01T10:00:00Z',
-    auction_id: auctionId,
-    subscriber_id: COMPETITOR_SUBSCRIBER_ID,
-    contact_name: 'Конкурент',
-    contact_phone: '+70000000001',
-    price_with_vat: current,
-    price_no_vat: currentNoVat,
-    organization_id: 501,
-    organization_inn: '7701234567',
-    organization_name: 'ООО Конкурент',
-    transporter_comment: null,
-    is_rejected: false,
-    is_counter: false,
-    place: 1,
-    is_win: false,
-    run_number: 0,
-    cancel_reason: '',
-  }
+  const { bets, nextBetId } = createSeedBets(
+    index,
+    auctionId,
+    current,
+    currentNoVat,
+  )
 
   const listItem: AuctionListItem = {
     main: {
@@ -276,7 +376,7 @@ function createSeedRecord(index: number): AuctionRecord {
       can_set_bet: canSetBet,
       allow_counter_bets: false,
       hide_bets_history: hideBetsHistory,
-      hide_places: false,
+      hide_places: hidePlaces,
       no_view_cargo_price: noViewCargoPrice,
       hide_points_address_and_contacts: hidePointsAddressAndContacts,
       is_bidder: isBidder,
@@ -380,11 +480,27 @@ function createSeedRecord(index: number): AuctionRecord {
     hide_bets_history: hideBetsHistory,
   }
 
+  if (index === SEED_FLAG_WINNER_BET) {
+    detail.trading.status_mobile = TradingStatus.Winner
+    detail.trading.your = {
+      bet: true,
+      last_bet: currentNoVat,
+      last_bet_with_vat: current,
+      win: true,
+    }
+    if (listItem.trading) {
+      listItem.trading.status_mobile =
+        AuctionListItemTradingStatusMobile.Winner
+      listItem.trading.is_bidder = true
+      listItem.trading.your = { bet: true, last_bet: current }
+    }
+  }
+
   return {
     listItem,
     detail,
-    bets: [competitorBet],
-    nextBetId: 2,
+    bets,
+    nextBetId,
   }
 }
 

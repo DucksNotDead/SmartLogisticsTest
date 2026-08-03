@@ -3,7 +3,7 @@ import { http, HttpResponse } from 'msw'
 import type { AuctionListRequest } from '@/shared/api/generated/schemas/auctionListRequest'
 import type { SetBetRequest } from '@/shared/api/generated/schemas/setBetRequest'
 
-import { delayListResponse } from './delay'
+import { delayMockResponse } from './delay'
 import { filterListItems, sortListItems } from './list-filter'
 import {
   applySetBet,
@@ -45,7 +45,7 @@ export const handlers = [
     const data = filtered.slice(fromIndex, fromIndex + perPage)
     const lastPage = Math.max(1, Math.ceil(total / perPage) || 1)
 
-    await delayListResponse()
+    await delayMockResponse()
 
     return HttpResponse.json({
       data,
@@ -60,9 +60,11 @@ export const handlers = [
     })
   }),
 
-  http.get('*/api/v1/auctions/:auctionUuid', ({ params }) => {
+  http.get('*/api/v1/auctions/:auctionUuid', async ({ params }) => {
     const auctionUuid = String(params.auctionUuid)
     const detail = getAuctionDetail(auctionUuid)
+
+    await delayMockResponse()
 
     if (!detail) {
       return problemJson(404, {
@@ -75,9 +77,11 @@ export const handlers = [
     return HttpResponse.json(detail)
   }),
 
-  http.get('*/api/v1/auctions/:auctionUuid/bets', ({ params, request }) => {
+  http.get('*/api/v1/auctions/:auctionUuid/bets', async ({ params, request }) => {
     const auctionUuid = String(params.auctionUuid)
     const bets = getAuctionBets(auctionUuid)
+
+    await delayMockResponse()
 
     if (!bets) {
       return problemJson(404, {
@@ -102,6 +106,7 @@ export const handlers = [
     try {
       payload = (await request.json()) as SetBetRequest
     } catch {
+      await delayMockResponse()
       return problemJson(422, {
         code: 'validation_failed',
         title: 'Ошибка валидации',
@@ -117,6 +122,7 @@ export const handlers = [
     }
 
     const result = applySetBet(auctionUuid, payload.price)
+    await delayMockResponse()
     if (!result.ok) {
       return problemJson(result.status, result.body)
     }

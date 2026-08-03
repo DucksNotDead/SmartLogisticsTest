@@ -67,6 +67,9 @@ test('getAuction seed includes visibility flag fixtures', async () => {
   const cannotBet = await byUuid(4)
   expect(cannotBet.trading.can_set_bet).toBe(false)
   expect(items[4]?.trading?.can_set_bet).toBe(false)
+
+  const hidePlaces = await byUuid(7)
+  expect(hidePlaces.trading.hide_places).toBe(true)
 })
 
 test('getAuction 200 for non-first seed item', async () => {

@@ -67,7 +67,7 @@ File-based TanStack Router:
 - UI states: skeleton ×12 / empty / error (+ «Повторить»); skeleton в той
   же сетке, что и карточки (`lg:grid-cols-2`); на `isPending` скролл main
   заблокирован
-- в `pnpm dev` MSW держит `POST /auctions/list` ~2s, чтобы skeleton был
+- в `pnpm dev` MSW держит ответы ~1s (`MOCK_DELAY_MS`), чтобы skeleton был
   заметен (в `pnpm test` задержки нет)
 - hover/focus по карточке префетчит `GET /auctions/{uuid}` в Query cache
 - клик ведёт на detail (`/auctions/$auctionUuid`)
@@ -83,11 +83,18 @@ File-based TanStack Router:
   «Инфо» | «Ставки»
 - «Инфо»: иерархия hero (цена / статус / своя ставка) → маршрут →
   supporting grid (груз/ТС, оплата, организатор, контакты, параметры)
-- «Ставки»: placeholder; при `hide_bets_history` - «История ставок скрыта»;
-  без `listBets` / формы set-bet (следующая change)
-- флаги: `can_set_bet`, `hide_bets_history`,
+- «Ставки»: `useListBets` → `GET /auctions/{uuid}/bets?all=true`
+  (отменённые ставки видны); mapper `mapBetList` + derived
+  `participantsCount` (unique org)
+- при `hide_bets_history` - «История ставок скрыта», без fetch bets
+- карточки иерархичные: цена крупнее; place / win / rejected цветом;
+  перевозчик и дата вторичнее; `cancel_reason` при отмене
+- `hide_places` скрывает место в рейтинге на карточке ставки
+- empty / skeleton / error(+retry) на вкладке; формы set-bet нет
+  (следующая change)
+- флаги: `can_set_bet`, `hide_bets_history`, `hide_places`,
   `hide_points_address_and_contacts`, `no_view_cargo_price`
-- UI states: skeleton / error (+ retry) / 404
+- UI states detail: skeleton / error (+ retry) / 404
 - enter/exit: CSS fade/slide на корне page (без framer-motion)
 - все React-компоненты detail: суффикс `*.component.tsx`
 - адаптив: `min-w-0` / `overflow-x-hidden`; supporting 1→2 колонки на `md+`
@@ -141,9 +148,9 @@ HTTP: base `/api/v1`, mutator в `shared/api` (ошибки 401/404/503 → `Pro
 
 Ручные handlers + in-memory store в `shared/api/mocks` (не Orval-mock): после `setBet` обновляются текущая цена, `status_mobile` и список ставок; list item синхронизируется с detail.
 
-В `pnpm dev` worker стартует из `app/main.tsx`. List-handler намеренно
-отвечает с задержкой ~2s (`LIST_DELAY_MS`), чтобы на `/auctions` был виден
-skeleton. В Vitest (`import.meta.env.MODE === 'test'`) delay = 0.
+В `pnpm dev` worker стартует из `app/main.tsx`. Все MSW handlers отвечают
+с задержкой ~1s (`MOCK_DELAY_MS`), чтобы были видны skeleton / loading.
+В Vitest (`import.meta.env.MODE === 'test'`) delay = 0.
 
 Для unit-тестов тот же store/handlers через `setupServer` (`vitest.setup.ts`).
 
@@ -175,15 +182,19 @@ Escape hatch: `HUSKY=0 git commit ...` или `git commit --no-verify`.
 ## Проверка
 
 1. `pnpm verify` — green (typecheck, lint, FSD, api tests).
-2. `pnpm dev` — `/` → `/auctions?page=1&per_page=20`; ~2s skeleton, затем список.
+2. `pnpm dev` — `/` → `/auctions?page=1&per_page=20`; ~1s skeleton, затем список.
 3. Пагинация / `per_page` меняют URL и контент; при скролле chrome и
    пагинация на месте; hover → prefetch detail; клик → detail page.
 4. Detail: шеврон назад; табы Инфо/Ставки; hero цены доминирует; CSS
    enter/exit; 404 на неизвестный uuid.
 5. Seed fixtures (list page 1): index 1 hide points/contacts; 2 no cargo
-   price; 3 hide bets history; 4 can_set_bet=false.
-6. Desktop: Фильтры после «На странице»; drawer справа; Save/Cancel/Reset.
-7. Mobile ~375: Фильтры и пагинация в одном ряду; detail без horizontal
-   scroll; draft без Save не меняет список.
-8. Pending list: 12 skeleton, скролл заблокирован; пресеты toggle.
-9. После смены OpenAPI: `pnpm api:gen`, затем снова `pnpm verify`.
+   price; 3 hide bets history; 4 can_set_bet=false; 5 empty bets;
+   6 winner bet (`is_win`); 7 hide places; index 0 — ≥2 ставки +
+   rejected с reason.
+6. Detail → «Ставки»: участники, цены с/без НДС, статусы цветом;
+   hide bets / hide places / empty / win / rejected.
+7. Desktop: Фильтры после «На странице»; drawer справа; Save/Cancel/Reset.
+8. Mobile ~375: Фильтры и пагинация в одном ряду; detail/bets без
+   horizontal scroll; draft без Save не меняет список.
+9. Pending list: 12 skeleton, скролл заблокирован; пресеты toggle.
+10. После смены OpenAPI: `pnpm api:gen`, затем снова `pnpm verify`.

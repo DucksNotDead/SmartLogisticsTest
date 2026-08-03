@@ -11,6 +11,7 @@
 | `007-list` | done   |
 | `008-filters` | done   |
 | `009-detail-page` | done   |
+| `010-bets-tab` | done   |
 
 Легенда: `draft` → `active` → `done` (или `blocked` / `cancelled`).
 
