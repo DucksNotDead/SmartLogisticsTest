@@ -1,7 +1,7 @@
 import { delay } from 'msw'
 
 /** Browser: keep list pending ~2s so skeleton is visible. Vitest: no delay. */
-export const LIST_DELAY_MS = import.meta.env.MODE === 'test' ? 0 : 2000
+export const LIST_DELAY_MS = 1000
 
 export async function delayListResponse(): Promise<void> {
   if (LIST_DELAY_MS <= 0) return
